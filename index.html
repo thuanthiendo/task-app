@@ -1,30 +1,9 @@
-<!DOCTYPE html>
-<html>
-<body>
-<h2>Đăng nhập</h2>
+<h1>Đăng nhập</h1>
 
-<input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Password">
-<button id="login">Đăng nhập</button>
+<form id="loginForm">
+  <input type="email" id="email" placeholder="Email" required>
+  <input type="password" id="password" placeholder="Mật khẩu" required>
+  <button type="submit">Đăng nhập</button>
+</form>
 
-<script type="module">
-import { auth } from "./firebase.js";
-import { signInWithEmailAndPassword } from
-"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-document.getElementById("login").onclick = () => {
-  signInWithEmailAndPassword(
-    auth,
-    email.value,
-    password.value
-  ).then(user => {
-    if (user.user.email === "admin@gmail.com") {
-      location.href = "admin.html";
-    } else {
-      location.href = "task.html";
-    }
-  }).catch(err => alert(err.message));
-};
-</script>
-</body>
-</html>
+<script src="script.js"></script>

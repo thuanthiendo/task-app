@@ -1,69 +1,20 @@
-// 🔥 Firebase config (THAY BẰNG CỦA BẠN)
-const firebaseConfig = {
-  apiKey: "API_KEY",
-  authDomain: "task-75413.firebaseapp.com",
-  projectId: "task-75413",
-};
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("loginForm");
+  if (!form) return;
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
 
-const tbody = document.querySelector("#taskTable tbody");
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
 
-// Load dữ liệu
-db.collection("tasks").doc("week").onSnapshot(doc => {
-  tbody.innerHTML = "";
-  if (!doc.exists) return;
-
-  const data = doc.data().members || [];
-  data.forEach(addRow);
+    // tài khoản admin cứng
+    if (email === "admin@gmail.com" && password === "123456") {
+      alert("Đăng nhập thành công!");
+      localStorage.setItem("login", "true");
+      window.location.href = "task.html";
+    } else {
+      alert("Sai email hoặc mật khẩu");
+    }
+  });
 });
-
-// Thêm dòng
-function addRow(member) {
-  const tr = document.createElement("tr");
-
-  const nameCell = document.createElement("td");
-  nameCell.innerText = member.name;
-  tr.appendChild(nameCell);
-
-  for (let i = 0; i < 7; i++) {
-    const td = document.createElement("td");
-    const input = document.createElement("input");
-    input.value = member.tasks[i] || "";
-    td.appendChild(input);
-    tr.appendChild(td);
-  }
-
-  tbody.appendChild(tr);
-}
-
-// Thêm thành viên (KHÔNG MẤT DATA)
-function addMember() {
-  const name = document.getElementById("memberName").value.trim();
-  if (!name) return;
-
-  db.collection("tasks").doc("week").get().then(doc => {
-    const members = doc.exists ? doc.data().members : [];
-    members.push({ name, tasks: [] });
-    db.collection("tasks").doc("week").set({ members });
-  });
-
-  document.getElementById("memberName").value = "";
-}
-
-// Lưu dữ liệu
-function saveData() {
-  const rows = document.querySelectorAll("tbody tr");
-  const members = [];
-
-  rows.forEach(row => {
-    const inputs = row.querySelectorAll("input");
-    const name = row.children[0].innerText;
-    const tasks = Array.from(inputs).map(i => i.value);
-    members.push({ name, tasks });
-  });
-
-  db.collection("tasks").doc("week").set({ members });
-  alert("✅ Đã lưu");
-}
