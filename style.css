@@ -1,0 +1,53 @@
+body {
+  font-family: Arial, sans-serif;
+  padding: 10px;
+  background: #f5f7fb;
+}
+
+h1 {
+  text-align: center;
+}
+
+.controls {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+input, button {
+  padding: 8px;
+  font-size: 14px;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: #2563eb;
+  color: white;
+  border-radius: 4px;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 700px;
+  background: white;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 6px;
+  text-align: center;
+}
+
+td input {
+  width: 100%;
+  border: none;
+  outline: none;
+  text-align: center;
+}

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h2>Nhiệm vụ của bạn</h2>
+<div id="list"></div>
+
+<script type="module">
+import { auth, db } from "./firebase.js";
+import { onAuthStateChanged } from
+"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { doc, getDoc } from
+"https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+onAuthStateChanged(auth, async user => {
+  if(!user){ location.href="index.html"; return; }
+
+  const snap = await getDoc(doc(db,"schedule","week1"));
+  const data = snap.data().data;
+
+  data.forEach(i=>{
+    if(i.name === user.email){
+      document.getElementById("list").innerHTML += `
+      <h3>${i.day}</h3>
+      <input type="checkbox"> ${i.task}<br>`;
+    }
+  });
+});
+</script>
+</body>
+</html>
