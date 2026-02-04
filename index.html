@@ -3,18 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <title>Đăng nhập</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="script.js" defer></script>
 </head>
 <body>
+  <h1>Đăng nhập</h1>
 
-<h1>Đăng nhập</h1>
-
-<input id="email" placeholder="Email (admin@gmail.com hoặc email nhân viên)">
-<button onclick="login()">Đăng nhập</button>
-
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
-<script src="script.js"></script>
+  <input id="email" placeholder="Nhập email" />
+  <button onclick="login()">Đăng nhập</button>
 </body>
 </html>
