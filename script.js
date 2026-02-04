@@ -1,49 +1,88 @@
-import { initializeApp } from
-"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-
-import { getFirestore, collection, getDocs } from
-"https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
+// 🔥 DÁN firebaseConfig CỦA BẠN
 const firebaseConfig = {
-  // 🔥 config của bạn
+  apiKey: "AIzaSyB-ldnW85PPEL3Y4SAbWEotRvmTLtzgq8o",
+  authDomain: "task-75413.firebaseapp.com",
+  projectId: "task-75413",
+  storageBucket: "task-75413.firebasestorage.app",
+  messagingSenderId: "934934617374",
+  appId: "1:934934617374:web:71ed6700a713351a72fd0f"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-async function loadSchedule() {
-  const snapshot = await getDocs(collection(db, "employees"));
-  const tbody = document.getElementById("schedule");
-  tbody.innerHTML = "";
+// ================= LOGIN =================
+function login() {
+  const email = document.getElementById("email").value;
 
-  snapshot.forEach(doc => {
-    const e = doc.data();
-    const row = `
-      <tr>
-        <td><a href="task.html?id=${doc.id}">${e.name}</a></td>
-        <td>${e.tasks?.mon?.title || ""}</td>
-        <td>${e.tasks?.tue?.title || ""}</td>
-        <td>${e.tasks?.wed?.title || ""}</td>
-        <td>${e.tasks?.thu?.title || ""}</td>
-        <td>${e.tasks?.fri?.title || ""}</td>
-        <td>${e.tasks?.sat?.title || ""}</td>
-        <td>${calcProgress(e.tasks)}</td>
-      </tr>
-    `;
-    tbody.innerHTML += row;
+  if (email === "admin@gmail.com") {
+    localStorage.setItem("user", "admin");
+    window.location.href = "admin.html";
+  } else {
+    localStorage.setItem("user", email);
+    window.location.href = "task.html";
+  }
+}
+
+// ================= ADMIN =================
+function addTask() {
+  const employee = document.getElementById("employee").value;
+  const day = document.getElementById("day").value;
+  const task = document.getElementById("task").value;
+
+  db.collection("tasks").add({
+    employee,
+    day,
+    task,
+    done: false,
+    time: new Date().toLocaleString()
   });
 }
 
-function calcProgress(tasks = {}) {
-  let done = 0, total = 0;
-  Object.values(tasks).forEach(day => {
-    day.checklist?.forEach(c => {
-      total++;
-      if (c.done) done++;
+if (document.getElementById("taskTable")) {
+  db.collection("tasks").onSnapshot(snapshot => {
+    const table = document.getElementById("taskTable");
+    table.innerHTML = "";
+    snapshot.forEach(doc => {
+      const d = doc.data();
+      table.innerHTML += `
+        <tr>
+          <td>${d.employee}</td>
+          <td>${d.day}</td>
+          <td>${d.task}</td>
+          <td>${d.done ? "✅ Xong" : "⏳ Chưa xong"}</td>
+        </tr>
+      `;
     });
   });
-  if (!total) return "";
-  return `${done}/${total} (${Math.round(done/total*100)}%)`;
 }
 
-loadSchedule();
+// ================= NHÂN VIÊN =================
+if (document.getElementById("myTasks")) {
+  const user = localStorage.getItem("user");
+
+  db.collection("tasks")
+    .where("employee", "==", user)
+    .onSnapshot(snapshot => {
+      const box = document.getElementById("myTasks");
+      box.innerHTML = "";
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        box.innerHTML += `
+          <div>
+            <input type="checkbox" ${d.done ? "checked" : ""}
+              onchange="toggleTask('${doc.id}', this.checked)">
+            <b>${d.day}</b> - ${d.task}
+            <small>(${d.time})</small>
+          </div>
+        `;
+      });
+    });
+}
+
+function toggleTask(id, value) {
+  db.collection("tasks").doc(id).update({
+    done: value,
+    time: new Date().toLocaleString()
+  });
+}

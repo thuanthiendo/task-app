@@ -1,57 +1,43 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin</title>
+  <link rel="stylesheet" href="style.css">
+</head>
 <body>
-<h2>Admin – Thời khóa biểu (26/01/2026)</h2>
 
-<table border="1" id="table">
-<tr>
-<th>Ngày</th>
-<th>Tên</th>
-<th>Nhiệm vụ</th>
-</tr>
+<h1>Bảng phân công công việc</h1>
+
+<input id="employee" placeholder="Tên nhân viên">
+<select id="day">
+  <option>Thứ 2</option>
+  <option>Thứ 3</option>
+  <option>Thứ 4</option>
+  <option>Thứ 5</option>
+  <option>Thứ 6</option>
+  <option>Thứ 7</option>
+</select>
+<input id="task" placeholder="Nhiệm vụ">
+<button onclick="addTask()">Thêm nhiệm vụ</button>
+
+<hr>
+
+<table border="1">
+  <thead>
+    <tr>
+      <th>Nhân viên</th>
+      <th>Thứ</th>
+      <th>Nhiệm vụ</th>
+      <th>Trạng thái</th>
+    </tr>
+  </thead>
+  <tbody id="taskTable"></tbody>
 </table>
 
-<button id="save">💾 Lưu</button>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="script.js"></script>
 
-<script type="module">
-import { db } from "./firebase.js";
-import { doc, setDoc } from
-"https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-const days = [
-  "Thứ 2 26/01",
-  "Thứ 3 27/01",
-  "Thứ 4 28/01",
-  "Thứ 5 29/01",
-  "Thứ 6 30/01",
-  "Thứ 7 31/01",
-  "CN 01/02"
-];
-
-const table = document.getElementById("table");
-
-days.forEach(d => {
-  table.innerHTML += `
-  <tr>
-    <td>${d}</td>
-    <td><input class="name"></td>
-    <td><textarea class="task"></textarea></td>
-  </tr>`;
-});
-
-document.getElementById("save").onclick = async () => {
-  const data = [];
-  document.querySelectorAll("tr").forEach((row,i)=>{
-    if(i===0) return;
-    data.push({
-      day: days[i-1],
-      name: row.querySelector(".name").value,
-      task: row.querySelector(".task").value
-    });
-  });
-  await setDoc(doc(db,"schedule","week1"),{data});
-  alert("Đã lưu");
-};
-</script>
 </body>
 </html>

@@ -1,160 +1,21 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<title>Task App</title>
-
-<style>
-body { font-family: Arial; padding: 20px; }
-input, button { padding: 6px; margin: 5px; }
-.hidden { display: none; }
-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-th, td { border: 1px solid #888; padding: 8px; text-align: center; }
-th { background: #eee; }
-.task { color: blue; cursor: pointer; }
-</style>
+  <meta charset="UTF-8">
+  <title>Đăng nhập</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<!-- LOGIN -->
-<div id="loginBox">
-    <h1>Đăng nhập</h1>
-    <input id="user" type="text" placeholder="Tài khoản">
-    <input id="pass" type="password" placeholder="Mật khẩu">
-    <br>
-    <button type="button" onclick="login()">Đăng nhập</button>
-</div>
+<h1>Đăng nhập</h1>
 
-<!-- ADMIN -->
-<div id="adminBox" class="hidden">
-    <h2>Admin - Thêm nhiệm vụ</h2>
-    <input id="empName" placeholder="Tên nhân viên">
-    <select id="day">
-        <option>Thứ 2</option>
-        <option>Thứ 3</option>
-        <option>Thứ 4</option>
-        <option>Thứ 5</option>
-        <option>Thứ 6</option>
-        <option>Thứ 7</option>
-    </select>
-    <input id="taskName" placeholder="Tên nhiệm vụ">
-    <button type="button" onclick="addTask()">Thêm</button>
-</div>
+<input id="email" type="email" placeholder="Email">
+<input id="password" type="password" placeholder="Mật khẩu">
+<button onclick="login()">Đăng nhập</button>
 
-<!-- TABLE -->
-<div id="tableBox" class="hidden">
-    <h1>Bảng phân công công việc</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Nhân viên</th>
-                <th>Thứ 2</th>
-                <th>Thứ 3</th>
-                <th>Thứ 4</th>
-                <th>Thứ 5</th>
-                <th>Thứ 6</th>
-                <th>Thứ 7</th>
-                <th>Ghi chú</th>
-            </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-    </table>
-</div>
-
-<script>
-const accounts = {
-    admin: { pass: "123", role: "admin" },
-    thien: { pass: "123", role: "staff" }
-};
-
-let currentUser = "";
-let data = JSON.parse(localStorage.getItem("tasks")) || {};
-
-function login() {
-    const u = document.getElementById("user").value;
-    const p = document.getElementById("pass").value;
-
-    if (!accounts[u] || accounts[u].pass !== p) {
-        alert("Sai tài khoản hoặc mật khẩu");
-        return;
-    }
-
-    currentUser = u;
-
-    document.getElementById("loginBox").classList.add("hidden");
-    document.getElementById("tableBox").classList.remove("hidden");
-
-    if (accounts[u].role === "admin") {
-        document.getElementById("adminBox").classList.remove("hidden");
-    }
-
-    renderTable();
-}
-
-function addTask() {
-    const emp = empName.value;
-    const d = day.value;
-    const t = taskName.value;
-
-    if (!emp || !t) return alert("Nhập đủ thông tin");
-
-    if (!data[emp]) data[emp] = {};
-    if (!data[emp][d]) data[emp][d] = [];
-
-    data[emp][d].push({ name: t, done: false });
-    save();
-    renderTable();
-}
-
-function renderTable() {
-    tableBody.innerHTML = "";
-
-    for (let emp in data) {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${emp}</td>`;
-
-        ["Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7"].forEach(d => {
-            const td = document.createElement("td");
-            if (data[emp][d]) {
-                data[emp][d].forEach((task, i) => {
-                    const div = document.createElement("div");
-                    div.className = "task";
-                    div.textContent = task.done ? "✔ " + task.name : task.name;
-                    div.onclick = () => toggleTask(emp, d, i);
-                    td.appendChild(div);
-                });
-            }
-            tr.appendChild(td);
-        });
-
-        tr.innerHTML += `<td>${countDone(emp)}</td>`;
-        tableBody.appendChild(tr);
-    }
-}
-
-function toggleTask(emp, day, i) {
-    if (currentUser !== emp && accounts[currentUser].role !== "admin") return;
-    data[emp][day][i].done = !data[emp][day][i].done;
-    save();
-    renderTable();
-}
-
-function countDone(emp) {
-    let done = 0, total = 0;
-    for (let d in data[emp]) {
-        data[emp][d].forEach(t => {
-            total++;
-            if (t.done) done++;
-        });
-    }
-    return done + "/" + total;
-}
-
-function save() {
-    localStorage.setItem("tasks", JSON.stringify(data));
-}
-</script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="script.js"></script>
 
 </body>
 </html>
