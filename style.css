@@ -1,70 +1,38 @@
 body {
-  font-family: system-ui, sans-serif;
-  margin: 16px;
+  font-family: Arial;
+  background: #f2f2f2;
+  padding: 10px;
 }
 
-h2 {
-  margin-bottom: 10px;
-}
-
-#adminControls, #loginBox {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 12px;
-}
-
-input, select, button {
-  padding: 8px;
-  font-size: 14px;
-}
-
-button {
-  cursor: pointer;
-}
-
-.table-wrapper {
-  overflow-x: auto;
+.box {
+  max-width: 300px;
+  margin: auto;
+  background: #fff;
+  padding: 20px;
 }
 
 table {
-  border-collapse: collapse;
-  min-width: 900px;
   width: 100%;
+  border-collapse: collapse;
+  background: white;
 }
 
-th, td {
+td, th {
   border: 1px solid #ccc;
   padding: 6px;
   vertical-align: top;
 }
 
-th {
-  background: #f5f5f5;
-  text-align: center;
+input, textarea {
+  width: 100%;
+  box-sizing: border-box;
 }
 
-td div {
-  background: #f9f9f9;
-  margin-bottom: 4px;
-  padding: 4px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-td div.done {
-  opacity: 0.6;
+.done {
   text-decoration: line-through;
+  color: green;
 }
 
-@media (max-width: 768px) {
-  body {
-    margin: 8px;
-  }
-
-  table {
-    font-size: 13px;
-  }
+button {
+  margin: 5px 0;
 }
