@@ -1,20 +1,21 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Admin</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 <h2>Quản lý công việc</h2>
 
-<div class="toolbar">
+<div class="control">
   <input id="taskName" placeholder="Tên công việc">
-  <select id="assignee">
+  <select id="member">
     <option value="Thiên">Thiên</option>
-    <option value="Minh">Minh</option>
+    <option value="Nhân viên 2">Nhân viên 2</option>
   </select>
-  <button onclick="addTask()">➕ Thêm</button>
+  <input type="time" id="time">
+  <button onclick="addTask()">＋ Thêm</button>
 </div>
 
 <table id="taskTable">
@@ -32,8 +33,7 @@
 
 <button onclick="logout()">Đăng xuất</button>
 
-<script src="auth.js"></script>
-<script type="module" src="admin.js"></script>
-<script>requireRole("admin")</script>
+<script type="module" src="app.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
