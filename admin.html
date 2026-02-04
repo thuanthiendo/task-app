@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <title>Admin</title>
-  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <h1>Bảng phân công công việc</h1>
 
-<input id="employee" placeholder="Tên nhân viên">
+<input id="employee" placeholder="Email nhân viên">
+
 <select id="day">
   <option>Thứ 2</option>
   <option>Thứ 3</option>
@@ -18,12 +18,14 @@
   <option>Thứ 6</option>
   <option>Thứ 7</option>
 </select>
+
 <input id="task" placeholder="Nhiệm vụ">
+
 <button onclick="addTask()">Thêm nhiệm vụ</button>
 
 <hr>
 
-<table border="1">
+<table border="1" width="100%">
   <thead>
     <tr>
       <th>Nhân viên</th>
@@ -35,9 +37,10 @@
   <tbody id="taskTable"></tbody>
 </table>
 
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="script.js"></script>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
+<script src="script.js"></script>
 </body>
 </html>
