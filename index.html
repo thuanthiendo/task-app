@@ -2,64 +2,44 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>Bảng nhiệm vụ</title>
-  <style>
-    body { font-family: Arial; padding: 20px; }
-    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; height: 60px; text-align: center; }
-    th { background: #f0f0f0; }
-  </style>
+  <title>Bảng nhiệm vụ 7 ngày</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <h2>BẢNG NHIỆM VỤ (7 NGÀY)</h2>
-<input id="nameInput" placeholder="Tên nhân viên" />
+<h2>BẢNG NHIỆM VỤ (7 NGÀY)</h2>
 
-<input id="taskInput" placeholder="Nhiệm vụ" />
+<div class="controls">
+  <input id="nameInput" placeholder="Tên nhân viên">
+  <select id="daySelect">
+    <option value="1">Thứ 2</option>
+    <option value="2">Thứ 3</option>
+    <option value="3">Thứ 4</option>
+    <option value="4">Thứ 5</option>
+    <option value="5">Thứ 6</option>
+    <option value="6">Thứ 7</option>
+    <option value="7">CN</option>
+  </select>
+  <input id="taskInput" placeholder="Nhập nhiệm vụ">
+  <button onclick="addTask()">➕ Thêm nhiệm vụ</button>
+</div>
 
-<select id="daySelect">
-  <option value="0">Thứ 2</option>
-  <option value="1">Thứ 3</option>
-  <option value="2">Thứ 4</option>
-  <option value="3">Thứ 5</option>
-  <option value="4">Thứ 6</option>
-  <option value="5">Thứ 7</option>
-  <option value="6">CN</option>
-</select>
+<table id="taskTable">
+  <thead>
+    <tr>
+      <th>Tên</th>
+      <th>Thứ 2</th>
+      <th>Thứ 3</th>
+      <th>Thứ 4</th>
+      <th>Thứ 5</th>
+      <th>Thứ 6</th>
+      <th>Thứ 7</th>
+      <th>CN</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
 
-<button id="addTaskBtn">➕ Thêm nhiệm vụ</button>
-
-
-
-  <table>
-    <thead>
-      <tr>
-        <th>Thứ 2</th>
-        <th>Thứ 3</th>
-        <th>Thứ 4</th>
-        <th>Thứ 5</th>
-        <th>Thứ 6</th>
-        <th>Thứ 7</th>
-        <th>CN</th>
-      </tr>
-    </thead>
-    <tbody id="taskTable">
-      <tr>
-        <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-      </tr>
-      <tr>
-        <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-      </tr>
-      <tr>
-        <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <!-- SCRIPT PHẢI NẰM Ở ĐÂY -->
-  <script src="./app.js"></script>
-
+<script src="app.js"></script>
 </body>
 </html>
-
-
