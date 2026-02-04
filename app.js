@@ -1,3 +1,4 @@
+/******** FIREBASE ********/
 const firebaseConfig = {
   apiKey: "AIzaSyB-ldnW85PPEL3Y4SAbWEotRvmTLtzgq8o",
   authDomain: "task-75413.firebaseapp.com",
@@ -7,83 +8,116 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-const days = ["Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7","CN"];
+/******** LOGIN ********/
+function login() {
+  const email = document.getElementById("email").value;
+  localStorage.setItem("email", email);
 
-function addTask() {
-  const name = document.getElementById("nameInput").value.trim();
-  const day = document.getElementById("dayInput").value;
-  const text = document.getElementById("taskInput").value.trim();
-
-  if (!name || !text) {
-    alert("Nhập đủ tên và nhiệm vụ");
-    return;
+  if (email === "admin@gmail.com") {
+    location.href = "admin.html";
+  } else {
+    location.href = "task.html";
   }
-
-  db.collection("tasks").add({
-    name,
-    day,
-    text,
-    done: false,
-    createdAt: Date.now() // 🔥 FIX: không dùng serverTimestamp
-  });
-
-  document.getElementById("taskInput").value = "";
 }
 
-// 🔥 KHÔNG orderBy
-db.collection("tasks").onSnapshot(snapshot => {
-  const data = {};
+/******** DAYS ********/
+const days = ["Tên", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Ghi chú"];
 
-  snapshot.forEach(doc => {
-    const d = doc.data();
-    if (!data[d.name]) data[d.name] = {};
-    if (!data[d.name][d.day]) data[d.name][d.day] = [];
-    data[d.name][d.day].push({ id: doc.id, ...d });
-  });
+/******** LOAD TABLE ********/
+function loadTable(isAdmin) {
+  const table = document.getElementById("schedule");
+  if (!table) return;
 
-  renderTable(data);
-});
+  db.collection("schedule").onSnapshot(snapshot => {
+    table.innerHTML = "";
 
-function renderTable(data) {
-  const body = document.getElementById("tableBody");
-  body.innerHTML = "";
+    // Header
+    let header = "<tr>";
+    days.forEach(d => header += `<th>${d}</th>`);
+    header += "</tr>";
+    table.innerHTML += header;
 
-  Object.keys(data).forEach(name => {
-    const tr = document.createElement("tr");
+    snapshot.forEach(doc => {
+      const row = doc.data();
+      let tr = `<tr>`;
 
-    const nameTd = document.createElement("td");
-    nameTd.innerHTML = `<b>${name}</b>`;
-    tr.appendChild(nameTd);
+      days.forEach(day => {
+        if (day === "Tên") {
+          tr += `<td>${row.name || ""}</td>`;
+        } else {
+          tr += `<td>`;
+          (row.tasks?.[day] || []).forEach((t, i) => {
+            tr += `
+              <div class="${t.done ? 'done' : ''}">
+                <input type="checkbox" ${t.done ? "checked" : ""}
+                  onchange="toggle('${doc.id}','${day}',${i},this.checked)">
+                ${t.text}
+                ${isAdmin ? `<button onclick="delTask('${doc.id}','${day}',${i})">❌</button>` : ""}
+              </div>`;
+          });
 
-    days.forEach(day => {
-      const td = document.createElement("td");
-
-      (data[name][day] || []).forEach(t => {
-        const div = document.createElement("div");
-        div.innerHTML = `
-          <input type="checkbox" ${t.done ? "checked" : ""}
-            onchange="toggleDone('${t.id}', this.checked)">
-          <span style="${t.done ? "text-decoration:line-through" : ""}">
-            ${t.text}
-          </span>
-          <button onclick="deleteTask('${t.id}')">❌</button>
-        `;
-        td.appendChild(div);
+          if (isAdmin) {
+            tr += `
+              <input placeholder="+ nhiệm vụ"
+                onkeydown="if(event.key==='Enter') addTask('${doc.id}','${day}',this.value,this)">`;
+          }
+          tr += `</td>`;
+        }
       });
 
-      tr.appendChild(td);
+      tr += "</tr>";
+      table.innerHTML += tr;
     });
-
-    body.appendChild(tr);
   });
 }
 
-function toggleDone(id, value) {
-  db.collection("tasks").doc(id).update({ done: value });
+/******** ADMIN ********/
+function addRow() {
+  const name = prompt("Tên nhân viên:");
+  if (!name) return;
+
+  db.collection("schedule").add({
+    name,
+    tasks: {}
+  });
 }
 
-function deleteTask(id) {
-  if (confirm("Xoá nhiệm vụ?")) {
-    db.collection("tasks").doc(id).delete();
-  }
+function addTask(id, day, text, input) {
+  if (!text) return;
+
+  const ref = db.collection("schedule").doc(id);
+  ref.get().then(doc => {
+    const data = doc.data();
+    if (!data.tasks[day]) data.tasks[day] = [];
+    data.tasks[day].push({ text, done: false });
+    ref.update({ tasks: data.tasks });
+    input.value = "";
+  });
+}
+
+function delTask(id, day, index) {
+  const ref = db.collection("schedule").doc(id);
+  ref.get().then(doc => {
+    const data = doc.data();
+    data.tasks[day].splice(index, 1);
+    ref.update({ tasks: data.tasks });
+  });
+}
+
+/******** EMPLOYEE ********/
+function toggle(id, day, index, val) {
+  const ref = db.collection("schedule").doc(id);
+  ref.get().then(doc => {
+    const data = doc.data();
+    data.tasks[day][index].done = val;
+    ref.update({ tasks: data.tasks });
+  });
+}
+
+/******** INIT ********/
+const email = localStorage.getItem("email");
+if (email === "admin@gmail.com") {
+  loadTable(true);
+} else {
+  loadTable(false);
 }
