@@ -1,43 +1,42 @@
 import { db } from "./firebase.js";
 import {
   collection,
-  addDoc,
-  getDocs,
-  query,
-  orderBy,
-  serverTimestamp
+  doc,
+  setDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const taskList = document.getElementById("taskList");
+window.saveAll = async function () {
+  const rows = document.querySelectorAll("#taskTable tbody tr");
 
-window.createTask = async function () {
-  const title = document.getElementById("title").value;
-  const desc = document.getElementById("desc").value;
-  const assignedTo = document.getElementById("employee").value;
+  for (let row of rows) {
+    const empId = row.dataset.id;
+    const cells = row.querySelectorAll("input");
 
-  await addDoc(collection(db, "tasks"), {
-    title,
-    description: desc,
-    assignedTo,
-    status: "pending",
-    createdAt: serverTimestamp()
-  });
+    const data = {
+      employeeId: empId,
+      employeeName: row.children[0].innerText,
+      week: getWeek(),
+      tasks: {
+        mon: cells[0].value,
+        tue: cells[1].value,
+        wed: cells[2].value,
+        thu: cells[3].value,
+        fri: cells[4].value,
+        sat: cells[5].value,
+        sun: cells[6].value
+      },
+      note: cells[7].value
+    };
 
-  alert("Đã tạo công việc");
-  loadTasks();
+    await setDoc(doc(db, "weekly_tasks", empId + "_" + data.week), data);
+  }
+
+  alert("Đã lưu phân công tuần");
 };
 
-async function loadTasks() {
-  taskList.innerHTML = "";
-  const q = query(collection(db, "tasks"), orderBy("createdAt", "desc"));
-  const snap = await getDocs(q);
-
-  snap.forEach(doc => {
-    const t = doc.data();
-    const li = document.createElement("li");
-    li.textContent = `${t.title} → ${t.assignedTo} (${t.status})`;
-    taskList.appendChild(li);
-  });
+function getWeek() {
+  const d = new Date();
+  const onejan = new Date(d.getFullYear(),0,1);
+  const week = Math.ceil((((d - onejan) / 86400000) + onejan.getDay()+1)/7);
+  return `${d.getFullYear()}-W${week}`;
 }
-
-loadTasks();
