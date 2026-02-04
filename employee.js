@@ -1,28 +1,34 @@
 import { db } from "./firebase.js";
 import {
-  collection,
-  getDocs,
-  query,
-  where
+  collection, onSnapshot, updateDoc, doc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const user = JSON.parse(localStorage.getItem("currentUser"));
-const taskList = document.getElementById("taskList");
+const user = JSON.parse(localStorage.getItem("user"));
+const tasksRef = collection(db, "tasks");
 
-async function loadMyTasks() {
-  const q = query(
-    collection(db, "tasks"),
-    where("assignedTo", "==", user.uid)
-  );
+onSnapshot(tasksRef, snap => {
+  const tb = document.querySelector("tbody");
+  tb.innerHTML = "";
 
-  const snap = await getDocs(q);
+  snap.forEach(d => {
+    const t = d.data();
+    const tr = document.createElement("tr");
 
-  snap.forEach(doc => {
-    const t = doc.data();
-    const li = document.createElement("li");
-    li.textContent = `${t.title} - ${t.status}`;
-    taskList.appendChild(li);
+    tr.innerHTML = `
+      <td>${t.user}</td>
+      ${t.days.map((v,i)=>
+        `<td><input type="checkbox" ${v?"checked":""}
+         onchange="toggle('${d.id}',${i},this.checked)"></td>`
+      ).join("")}
+      <td>${t.note || ""}</td>
+    `;
+    tb.appendChild(tr);
   });
-}
+});
 
-loadMyTasks();
+window.toggle = async (id, i, v) => {
+  const ref = doc(db, "tasks", id);
+  const t = (await getDoc(ref)).data();
+  t.days[i] = v;
+  await updateDoc(ref, { days: t.days });
+};
