@@ -1,27 +1,52 @@
-const users = [
-  { username: "admin", password: "123456", role: "admin" },
-  { username: "emp1", password: "123456", role: "employee" }
-];
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } 
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-function login() {
-  const username = document.getElementById("username").value.trim();
-  const password = document.getElementById("password").value.trim();
+const firebaseConfig = {
+  apiKey: "YOUR_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT"
+};
 
-  const user = users.find(
-    u => u.username === username && u.password === password
-  );
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const tasksRef = collection(db, "tasks");
 
-  if (!user) {
-    alert("Tài khoản hoặc mật khẩu không đúng");
-    return;
+window.addTask = async () => {
+  const name = taskName.value;
+  const member = member.value;
+  const time = document.getElementById("time").value;
+
+  await addDoc(tasksRef, {
+    name, member, time,
+    days: {},
+    note: ""
+  });
+};
+
+onSnapshot(tasksRef, snap => {
+  const body = document.querySelector("#taskTable tbody");
+  body.innerHTML = "";
+
+  snap.forEach(d => {
+    const t = d.data();
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${t.name}<br><small>${t.time || ""}</small></td>
+      ${["T2","T3","T4","T5","T6","T7","CN"]
+        .map(day => `<td><input type="checkbox"></td>`).join("")}
+      <td contenteditable></td>
+      ${location.pathname.includes("admin") 
+        ? `<td><button onclick="del('${d.id}')">X</button></td>` 
+        : ""}
+    `;
+    body.appendChild(tr);
+  });
+});
+
+window.del = async id => {
+  if(confirm("Xóa công việc?")) {
+    await deleteDoc(doc(db, "tasks", id));
   }
-
-  // Lưu session
-  localStorage.setItem("user", JSON.stringify(user));
-
-  if (user.role === "admin") {
-    window.location.href = "admin.html";
-  } else {
-    window.location.href = "employee.html";
-  }
-}
+};
