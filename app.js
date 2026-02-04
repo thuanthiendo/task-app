@@ -1,65 +1,32 @@
+console.log("APP JS ĐÃ LOAD");
+
 const firebaseConfig = {
-  apiKey: "AIzaSyB-ldnW85PPEL3Y4SAbWEotRvmTLtzgq8o",
+  apiKey: "AIzaSyB-ldnw85PPELY4SAbWEotRvmTLtzq8o",
   authDomain: "task-75413.firebaseapp.com",
   projectId: "task-75413",
 };
 
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+
 const auth = firebase.auth();
+const db = firebase.firestore();
+
+const email = document.getElementById("email");
+const password = document.getElementById("password");
 
 function login() {
-  auth.signInWithEmailAndPassword(
-    email.value,
-    password.value
-  ).then(u => {
-    if (u.user.email.includes("admin")) {
-      location.href = "admin.html";
-    } else {
-      location.href = "employee.html";
-    }
-  });
+  if (!email.value || !password.value) {
+    alert("Nhập email và mật khẩu");
+    return;
+  }
+
+  auth.signInWithEmailAndPassword(email.value, password.value)
+    .then(u => {
+      if (u.user.email.includes("admin")) {
+        location.href = "admin.html";
+      } else {
+        location.href = "employee.html";
+      }
+    })
+    .catch(err => alert(err.message));
 }
-
-function addTask() {
-  const name = empName.value;
-  const day = day.value;
-  const text = taskText.value;
-
-  if (!name || !text) return alert("Thiếu dữ liệu");
-
-  db.collection("tasks").add({
-    name, day, text, done: false
-  });
-}
-
-db.collection("tasks").onSnapshot(snap => {
-  const board = document.getElementById("board");
-  if (!board) return;
-
-  const map = {};
-  snap.forEach(d => {
-    const t = d.data();
-    map[t.name] ??= {};
-    map[t.name][t.day] ??= [];
-    map[t.name][t.day].push({ ...t, id: d.id });
-  });
-
-  board.innerHTML = "";
-  Object.keys(map).forEach(name => {
-    let row = `<tr><td>${name}</td>`;
-    ["Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7","CN"].forEach(d => {
-      row += `<td>${
-        (map[name][d]||[]).map(t =>
-          `<div class="task ${t.done?'done':''}">
-            ${t.text}
-            <button onclick="db.collection('tasks').doc('${t.id}').update({done:!${t.done}})">✔</button>
-            <button onclick="db.collection('tasks').doc('${t.id}').delete()">❌</button>
-          </div>`
-        ).join("")
-      }</td>`;
-    });
-    row += "</tr>";
-    board.innerHTML += row;
-  });
-});
