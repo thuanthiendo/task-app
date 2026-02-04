@@ -2,53 +2,16 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Bảng phân công công việc</title>
+<title>Task App</title>
 
 <style>
-body {
-    font-family: Arial, sans-serif;
-    padding: 20px;
-}
-
-h1 {
-    margin-bottom: 10px;
-}
-
-input, button {
-    padding: 6px;
-    margin: 4px;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
-
-th, td {
-    border: 1px solid #999;
-    padding: 8px;
-    text-align: center;
-}
-
-th {
-    background: #f2f2f2;
-}
-
-.task {
-    cursor: pointer;
-    color: blue;
-    text-decoration: underline;
-}
-
-.hidden {
-    display: none;
-}
-
-.note {
-    font-size: 12px;
-    color: green;
-}
+body { font-family: Arial; padding: 20px; }
+input, button { padding: 6px; margin: 5px; }
+.hidden { display: none; }
+table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+th, td { border: 1px solid #888; padding: 8px; text-align: center; }
+th { background: #eee; }
+.task { color: blue; cursor: pointer; }
 </style>
 </head>
 
@@ -59,12 +22,13 @@ th {
     <h1>Đăng nhập</h1>
     <input id="user" type="text" placeholder="Tài khoản">
     <input id="pass" type="password" placeholder="Mật khẩu">
-    <button onclick="login()">Đăng nhập</button>
+    <br>
+    <button type="button" onclick="login()">Đăng nhập</button>
 </div>
 
 <!-- ADMIN -->
 <div id="adminBox" class="hidden">
-    <h1>Admin - Thêm nhiệm vụ</h1>
+    <h2>Admin - Thêm nhiệm vụ</h2>
     <input id="empName" placeholder="Tên nhân viên">
     <select id="day">
         <option>Thứ 2</option>
@@ -75,13 +39,12 @@ th {
         <option>Thứ 7</option>
     </select>
     <input id="taskName" placeholder="Tên nhiệm vụ">
-    <button onclick="addTask()">Thêm</button>
+    <button type="button" onclick="addTask()">Thêm</button>
 </div>
 
-<!-- BẢNG -->
+<!-- TABLE -->
 <div id="tableBox" class="hidden">
     <h1>Bảng phân công công việc</h1>
-
     <table>
         <thead>
             <tr>
@@ -106,12 +69,11 @@ const accounts = {
 };
 
 let currentUser = "";
-
 let data = JSON.parse(localStorage.getItem("tasks")) || {};
 
 function login() {
-    const u = user.value;
-    const p = pass.value;
+    const u = document.getElementById("user").value;
+    const p = document.getElementById("pass").value;
 
     if (!accounts[u] || accounts[u].pass !== p) {
         alert("Sai tài khoản hoặc mật khẩu");
@@ -119,11 +81,12 @@ function login() {
     }
 
     currentUser = u;
-    loginBox.classList.add("hidden");
-    tableBox.classList.remove("hidden");
+
+    document.getElementById("loginBox").classList.add("hidden");
+    document.getElementById("tableBox").classList.remove("hidden");
 
     if (accounts[u].role === "admin") {
-        adminBox.classList.remove("hidden");
+        document.getElementById("adminBox").classList.remove("hidden");
     }
 
     renderTable();
@@ -139,12 +102,7 @@ function addTask() {
     if (!data[emp]) data[emp] = {};
     if (!data[emp][d]) data[emp][d] = [];
 
-    data[emp][d].push({
-        name: t,
-        done: false,
-        time: ""
-    });
-
+    data[emp][d].push({ name: t, done: false });
     save();
     renderTable();
 }
@@ -162,7 +120,7 @@ function renderTable() {
                 data[emp][d].forEach((task, i) => {
                     const div = document.createElement("div");
                     div.className = "task";
-                    div.textContent = task.name;
+                    div.textContent = task.done ? "✔ " + task.name : task.name;
                     div.onclick = () => toggleTask(emp, d, i);
                     td.appendChild(div);
                 });
@@ -170,29 +128,27 @@ function renderTable() {
             tr.appendChild(td);
         });
 
-        const note = document.createElement("td");
-        let completed = 0, total = 0;
-        for (let d in data[emp]) {
-            data[emp][d].forEach(t => {
-                total++;
-                if (t.done) completed++;
-            });
-        }
-        note.innerHTML = `<div class="note">${completed}/${total} hoàn thành</div>`;
-        tr.appendChild(note);
-
+        tr.innerHTML += `<td>${countDone(emp)}</td>`;
         tableBody.appendChild(tr);
     }
 }
 
-function toggleTask(emp, day, index) {
+function toggleTask(emp, day, i) {
     if (currentUser !== emp && accounts[currentUser].role !== "admin") return;
-
-    const task = data[emp][day][index];
-    task.done = !task.done;
-    task.time = task.done ? new Date().toLocaleString() : "";
+    data[emp][day][i].done = !data[emp][day][i].done;
     save();
     renderTable();
+}
+
+function countDone(emp) {
+    let done = 0, total = 0;
+    for (let d in data[emp]) {
+        data[emp][d].forEach(t => {
+            total++;
+            if (t.done) done++;
+        });
+    }
+    return done + "/" + total;
 }
 
 function save() {
