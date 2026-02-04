@@ -5,15 +5,14 @@
   <title>Đăng nhập</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="center">
+  <div class="card">
+    <h2>Đăng nhập</h2>
+    <input id="username" placeholder="Tên đăng nhập">
+    <input id="password" type="password" placeholder="Mật khẩu">
+    <button onclick="login()">Đăng nhập</button>
+  </div>
 
-<h2>Đăng nhập</h2>
-
-<input id="username" placeholder="Tên đăng nhập">
-<input id="password" type="password" placeholder="Mật khẩu">
-
-<button onclick="login()">Đăng nhập</button>
-
-<script src="app.js"></script>
+  <script src="auth.js"></script>
 </body>
 </html>
