@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h2>Admin – Bảng phân công</h2>
+
+<div class="form">
+  <input id="employee" placeholder="Tên nhân viên">
+  <select id="day">
+    <option>Thứ 2</option>
+    <option>Thứ 3</option>
+    <option>Thứ 4</option>
+    <option>Thứ 5</option>
+    <option>Thứ 6</option>
+    <option>Thứ 7</option>
+  </select>
+  <input id="task" placeholder="Nhiệm vụ">
+  <button onclick="addTask()">➕ Thêm</button>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Nhân viên</th>
+      <th>Ngày</th>
+      <th>Nhiệm vụ</th>
+      <th>Trạng thái</th>
+      <th>Xoá</th>
+    </tr>
+  </thead>
+  <tbody id="adminTable"></tbody>
+</table>
+
+<script src="script.js"></script>
+</body>
+</html>
