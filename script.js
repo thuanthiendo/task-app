@@ -1,8 +1,11 @@
-// 🔥 Firebase config
+// ===== FIREBASE CONFIG =====
 const firebaseConfig = {
   apiKey: "AIzaSyB-ldnW85PPEL3Y4SAbWEotRvmTLtzgq8o",
   authDomain: "task-75413.firebaseapp.com",
   projectId: "task-75413",
+  storageBucket: "task-75413.firebasestorage.app",
+  messagingSenderId: "934934617374",
+  appId: "1:934934617374:web:71ed6700a713351a72fd0f"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -10,17 +13,18 @@ const db = firebase.firestore();
 
 // ================= LOGIN =================
 function login() {
-  const name = document.getElementById("name").value.trim();
-  if (!name) {
-    alert("Nhập tên!");
+  const email = document.getElementById("email").value.trim();
+
+  if (!email) {
+    alert("Nhập tên hoặc email");
     return;
   }
 
-  if (name.toLowerCase() === "admin") {
-    localStorage.setItem("user", "admin");
+  localStorage.setItem("user", email);
+
+  if (email === "admin@gmail.com") {
     window.location.href = "admin.html";
   } else {
-    localStorage.setItem("user", name);
     window.location.href = "task.html";
   }
 }
@@ -32,7 +36,7 @@ function addTask() {
   const task = document.getElementById("task").value.trim();
 
   if (!employee || !task) {
-    alert("Nhập đủ thông tin");
+    alert("Nhập đầy đủ thông tin");
     return;
   }
 
@@ -47,23 +51,24 @@ function addTask() {
   document.getElementById("task").value = "";
 }
 
-// Hiển thị bảng admin
+// Hiển thị danh sách cho admin
 if (document.getElementById("taskTable")) {
-  db.collection("tasks").onSnapshot(snapshot => {
-    const table = document.getElementById("taskTable");
-    table.innerHTML = "";
-    snapshot.forEach(doc => {
-      const d = doc.data();
-      table.innerHTML += `
-        <tr>
-          <td>${d.employee}</td>
-          <td>${d.day}</td>
-          <td>${d.task}</td>
-          <td>${d.done ? "✅ Xong" : "⏳ Đang làm"}</td>
-        </tr>
-      `;
+  db.collection("tasks").orderBy("time", "desc")
+    .onSnapshot(snapshot => {
+      const table = document.getElementById("taskTable");
+      table.innerHTML = "";
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        table.innerHTML += `
+          <tr>
+            <td>${d.employee}</td>
+            <td>${d.day}</td>
+            <td>${d.task}</td>
+            <td>${d.done ? "✅ Xong" : "⏳ Đang làm"}</td>
+          </tr>
+        `;
+      });
     });
-  });
 }
 
 // ================= NHÂN VIÊN =================
@@ -77,14 +82,15 @@ if (document.getElementById("myTasks")) {
       box.innerHTML = "";
 
       if (snapshot.empty) {
-        box.innerHTML = "<i>Chưa có nhiệm vụ</i>";
+        box.innerHTML = "<p>Chưa có nhiệm vụ</p>";
       }
 
       snapshot.forEach(doc => {
         const d = doc.data();
         box.innerHTML += `
-          <div>
-            <input type="checkbox" ${d.done ? "checked" : ""}
+          <div style="margin-bottom:10px">
+            <input type="checkbox"
+              ${d.done ? "checked" : ""}
               onchange="toggleTask('${doc.id}', this.checked)">
             <b>${d.day}</b> - ${d.task}
             <small>(${d.time})</small>
