@@ -2,11 +2,32 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Nhân viên</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Employee</title>
 </head>
 <body>
-  <h1>Trang Nhân viên</h1>
-  <p>Chào bạn 👋</p>
+
+<h2>Trang Nhân viên</h2>
+<p id="welcome"></p>
+
+<button onclick="logout()">Đăng xuất</button>
+
+<script>
+  const role = sessionStorage.getItem("role");
+  const username = sessionStorage.getItem("username");
+
+  if (role !== "employee") {
+    alert("Không có quyền truy cập");
+    window.location.href = "index.html";
+  }
+
+  document.getElementById("welcome").innerText =
+    "Xin chào nhân viên: " + username;
+
+  function logout() {
+    sessionStorage.clear();
+    window.location.href = "index.html";
+  }
+</script>
+
 </body>
 </html>
