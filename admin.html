@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Admin</title>
 </head>
 <body>
 
-<h1>Bảng phân công công việc</h1>
+<h2>Thêm nhiệm vụ</h2>
 
-<h3>Thêm nhiệm vụ</h3>
-<input id="employee" placeholder="Tên nhân viên" />
+<input id="employee" placeholder="Tên nhân viên">
 <select id="day">
   <option>Thứ 2</option>
   <option>Thứ 3</option>
@@ -18,27 +17,14 @@
   <option>Thứ 6</option>
   <option>Thứ 7</option>
 </select>
-<input id="task" placeholder="Nhiệm vụ" />
+<input id="task" placeholder="Nhiệm vụ">
+<button onclick="addTask()">➕ Thêm</button>
 
-<button onclick="addTask()">➕ Thêm nhiệm vụ</button>
-
-<h3>Danh sách nhiệm vụ</h3>
-<table border="1" width="100%">
-  <thead>
-    <tr>
-      <th>Nhân viên</th>
-      <th>Ngày</th>
-      <th>Nhiệm vụ</th>
-      <th>Trạng thái</th>
-      <th>Xoá</th>
-    </tr>
-  </thead>
-  <tbody id="taskTable"></tbody>
-</table>
+<hr>
+<a href="board.html">➡ Xem bảng thời khóa biểu</a>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="script.js"></script>
-
 </body>
 </html>
