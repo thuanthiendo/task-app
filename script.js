@@ -14,104 +14,76 @@ const db = firebase.firestore();
 // ===== LOGIN =====
 function login() {
   const name = document.getElementById("name").value.trim();
-  if (!name) {
-    alert("Nhập tên!");
-    return;
-  }
-
+  if (!name) return alert("Nhập tên");
   localStorage.setItem("username", name);
-
-  if (name.toLowerCase() === "admin") {
-    window.location.href = "admin.html";
-  } else {
-    window.location.href = "task.html";
-  }
+  window.location.href = "board.html";
 }
 
-// ===== ADMIN: THÊM NHIỆM VỤ =====
+// ===== ADMIN ADD =====
 function addTask() {
   const employee = document.getElementById("employee").value.trim();
   const day = document.getElementById("day").value;
   const task = document.getElementById("task").value.trim();
 
-  if (!employee || !task) {
-    alert("Nhập đủ thông tin!");
-    return;
-  }
+  if (!employee || !task) return alert("Nhập đủ");
 
   db.collection("tasks").add({
     employee,
     day,
     task,
     done: false,
+    note: "",
     time: new Date().toLocaleString()
   });
 
   document.getElementById("task").value = "";
 }
 
-// ===== ADMIN: HIỂN THỊ + XOÁ =====
-const table = document.getElementById("taskTable");
-if (table) {
-  db.collection("tasks").orderBy("time", "desc").onSnapshot(snapshot => {
-    table.innerHTML = "";
+// ===== BOARD =====
+const body = document.getElementById("tableBody");
+if (body) {
+  db.collection("tasks").onSnapshot(snapshot => {
+    const data = {};
+
     snapshot.forEach(doc => {
       const d = doc.data();
-      table.innerHTML += `
+      if (!data[d.employee]) {
+        data[d.employee] = {
+          "Thứ 2": "", "Thứ 3": "", "Thứ 4": "",
+          "Thứ 5": "", "Thứ 6": "", "Thứ 7": "",
+          note: ""
+        };
+      }
+
+      data[d.employee][d.day] =
+        `<label>
+          <input type="checkbox" ${d.done ? "checked" : ""}
+            onchange="toggle('${doc.id}', this.checked)">
+          ${d.task}
+        </label>`;
+    });
+
+    body.innerHTML = "";
+    Object.keys(data).forEach(name => {
+      body.innerHTML += `
         <tr>
-          <td>${d.employee}</td>
-          <td>${d.day}</td>
-          <td>${d.task}</td>
-          <td>${d.done ? "✅ Xong" : "⏳ Chưa xong"}</td>
-          <td>
-            <button onclick="deleteTask('${doc.id}')">❌</button>
-          </td>
+          <td>${name}</td>
+          <td>${data[name]["Thứ 2"]}</td>
+          <td>${data[name]["Thứ 3"]}</td>
+          <td>${data[name]["Thứ 4"]}</td>
+          <td>${data[name]["Thứ 5"]}</td>
+          <td>${data[name]["Thứ 6"]}</td>
+          <td>${data[name]["Thứ 7"]}</td>
+          <td></td>
         </tr>
       `;
     });
   });
 }
 
-function deleteTask(id) {
-  if (confirm("Xoá nhiệm vụ?")) {
-    db.collection("tasks").doc(id).delete();
-  }
-}
-
-// ===== NHÂN VIÊN =====
-const box = document.getElementById("myTasks");
-if (box) {
-  const name = localStorage.getItem("username");
-  if (!name) {
-    box.innerHTML = "Chưa đăng nhập";
-  } else {
-    db.collection("tasks")
-      .where("employee", "==", name)
-      .onSnapshot(snapshot => {
-        if (snapshot.empty) {
-          box.innerHTML = "Chưa có nhiệm vụ";
-          return;
-        }
-
-        box.innerHTML = "";
-        snapshot.forEach(doc => {
-          const d = doc.data();
-          box.innerHTML += `
-            <div>
-              <input type="checkbox" ${d.done ? "checked" : ""}
-                onchange="toggleTask('${doc.id}', this.checked)">
-              <b>${d.day}</b> – ${d.task}
-              <small>(${d.time})</small>
-            </div>
-          `;
-        });
-      });
-  }
-}
-
-function toggleTask(id, value) {
+function toggle(id, v) {
   db.collection("tasks").doc(id).update({
-    done: value,
+    done: v,
     time: new Date().toLocaleString()
   });
 }
