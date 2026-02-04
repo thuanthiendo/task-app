@@ -1,19 +1,49 @@
-const taskList = document.getElementById("taskList");
+import { initializeApp } from
+"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 
-// Dữ liệu test
-const tasks = [
-  { title: "Làm báo cáo", assignee: "Thiên", done: false },
-  { title: "Fix bug", assignee: "Admin", done: true }
-];
+import { getFirestore, collection, getDocs } from
+"https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-tasks.forEach(task => {
-  const tr = document.createElement("tr");
+const firebaseConfig = {
+  // 🔥 config của bạn
+};
 
-  tr.innerHTML = `
-    <td>${task.title}</td>
-    <td>${task.assignee}</td>
-    <td>${task.done ? "✅ Xong" : "⏳ Chưa xong"}</td>
-  `;
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-  taskList.appendChild(tr);
-});
+async function loadSchedule() {
+  const snapshot = await getDocs(collection(db, "employees"));
+  const tbody = document.getElementById("schedule");
+  tbody.innerHTML = "";
+
+  snapshot.forEach(doc => {
+    const e = doc.data();
+    const row = `
+      <tr>
+        <td><a href="task.html?id=${doc.id}">${e.name}</a></td>
+        <td>${e.tasks?.mon?.title || ""}</td>
+        <td>${e.tasks?.tue?.title || ""}</td>
+        <td>${e.tasks?.wed?.title || ""}</td>
+        <td>${e.tasks?.thu?.title || ""}</td>
+        <td>${e.tasks?.fri?.title || ""}</td>
+        <td>${e.tasks?.sat?.title || ""}</td>
+        <td>${calcProgress(e.tasks)}</td>
+      </tr>
+    `;
+    tbody.innerHTML += row;
+  });
+}
+
+function calcProgress(tasks = {}) {
+  let done = 0, total = 0;
+  Object.values(tasks).forEach(day => {
+    day.checklist?.forEach(c => {
+      total++;
+      if (c.done) done++;
+    });
+  });
+  if (!total) return "";
+  return `${done}/${total} (${Math.round(done/total*100)}%)`;
+}
+
+loadSchedule();
