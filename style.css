@@ -1,5 +1,5 @@
 body {
-  font-family: Arial;
+  font-family: Arial, sans-serif;
   padding: 20px;
 }
 
@@ -9,18 +9,27 @@ input, select, button {
 }
 
 table {
-  border-collapse: collapse;
   width: 100%;
+  border-collapse: collapse;
   margin-top: 15px;
 }
 
 th, td {
   border: 1px solid #333;
   padding: 6px;
+  vertical-align: top;
   text-align: center;
+}
+
+.task {
+  background: #e3f2fd;
+  margin: 4px 0;
+  padding: 4px;
+  border-radius: 4px;
+  font-size: 14px;
 }
 
 .done {
   text-decoration: line-through;
-  color: green;
+  background: #c8e6c9;
 }
