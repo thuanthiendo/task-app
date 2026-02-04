@@ -9,25 +9,25 @@
 
 <h2>BẢNG NHIỆM VỤ (7 NGÀY)</h2>
 
-<div class="controls">
-  <input id="nameInput" placeholder="Tên nhân viên">
-  <select id="daySelect">
-    <option value="1">Thứ 2</option>
-    <option value="2">Thứ 3</option>
-    <option value="3">Thứ 4</option>
-    <option value="4">Thứ 5</option>
-    <option value="5">Thứ 6</option>
-    <option value="6">Thứ 7</option>
-    <option value="7">CN</option>
+<div class="add-box">
+  <input id="nameInput" placeholder="Tên nhân viên" />
+  <select id="dayInput">
+    <option>Thứ 2</option>
+    <option>Thứ 3</option>
+    <option>Thứ 4</option>
+    <option>Thứ 5</option>
+    <option>Thứ 6</option>
+    <option>Thứ 7</option>
+    <option>CN</option>
   </select>
-  <input id="taskInput" placeholder="Nhập nhiệm vụ">
-  <button onclick="addTask()">➕ Thêm nhiệm vụ</button>
+  <input id="taskInput" placeholder="Nhiệm vụ" />
+  <button onclick="addTask()">➕ Thêm</button>
 </div>
 
-<table id="taskTable">
+<table id="schedule">
   <thead>
     <tr>
-      <th>Tên</th>
+      <th>Nhân viên</th>
       <th>Thứ 2</th>
       <th>Thứ 3</th>
       <th>Thứ 4</th>
@@ -37,8 +37,12 @@
       <th>CN</th>
     </tr>
   </thead>
-  <tbody></tbody>
+  <tbody id="tableBody"></tbody>
 </table>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script src="app.js"></script>
 </body>
