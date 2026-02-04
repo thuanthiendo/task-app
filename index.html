@@ -3,22 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <title>Đăng nhập</title>
-
-<!-- Firebase v8 -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <h2>Đăng nhập</h2>
 
-<h2>Đăng nhập</h2>
+  <form id="loginForm">
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Mật khẩu" required>
+    <button type="submit">Đăng nhập</button>
+  </form>
 
-<input id="email" placeholder="Email"><br><br>
-<input id="password" type="password" placeholder="Mật khẩu"><br><br>
-
-<button onclick="login()">Đăng nhập</button>
-
-<script src="app.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>
-
