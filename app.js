@@ -35,3 +35,6 @@ function login() {
     })
     .catch(err => alert(err.message));
 }
+auth.onAuthStateChanged(user => {
+  console.log("Auth state:", user);
+});
