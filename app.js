@@ -1,39 +1,23 @@
-// ===== DANH SÁCH TÀI KHOẢN =====
-const USERS = [
-  {
-    username: "admin",
-    password: "123456",
-    role: "admin"
-  },
-  {
-    username: "thuanthien",
-    password: "111111",
-    role: "employee"
-  },
-  {
-    username: "duykhang",
-    password: "111111",
-    role: "employee"
-  }
+const users = [
+  { username: "admin", password: "123456", role: "admin" },
+  { username: "emp1", password: "123456", role: "employee" }
 ];
 
-// ===== LOGIN =====
 function login() {
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value.trim();
 
-  const user = USERS.find(
+  const user = users.find(
     u => u.username === username && u.password === password
   );
 
   if (!user) {
-    alert("Sai tên đăng nhập hoặc mật khẩu");
+    alert("Tài khoản hoặc mật khẩu không đúng");
     return;
   }
 
-  // lưu session (để refresh không văng)
-  sessionStorage.setItem("role", user.role);
-  sessionStorage.setItem("username", user.username);
+  // Lưu session
+  localStorage.setItem("user", JSON.stringify(user));
 
   if (user.role === "admin") {
     window.location.href = "admin.html";
