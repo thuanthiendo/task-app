@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>Bảng công việc</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>Bảng phân công công việc</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
 <h2>Bảng phân công công việc</h2>
 
-<table id="schedule">
+<table id="schedule" border="1" cellpadding="8">
   <thead>
     <tr>
       <th>Nhân viên</th>
@@ -25,8 +25,12 @@
   <tbody id="tableBody"></tbody>
 </table>
 
+<!-- 🔥 FIREBASE (BẮT BUỘC ĐÚNG THỨ TỰ) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<!-- SCRIPT CHÍNH -->
 <script src="script.js"></script>
+
 </body>
 </html>
