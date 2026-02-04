@@ -1,20 +1,19 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("loginForm");
-  if (!form) return;
+const taskList = document.getElementById("taskList");
 
-  form.addEventListener("submit", function (e) {
-    e.preventDefault();
+// Dữ liệu test
+const tasks = [
+  { title: "Làm báo cáo", assignee: "Thiên", done: false },
+  { title: "Fix bug", assignee: "Admin", done: true }
+];
 
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+tasks.forEach(task => {
+  const tr = document.createElement("tr");
 
-    // tài khoản admin cứng
-    if (email === "admin@gmail.com" && password === "123456") {
-      alert("Đăng nhập thành công!");
-      localStorage.setItem("login", "true");
-      window.location.href = "task.html";
-    } else {
-      alert("Sai email hoặc mật khẩu");
-    }
-  });
+  tr.innerHTML = `
+    <td>${task.title}</td>
+    <td>${task.assignee}</td>
+    <td>${task.done ? "✅ Xong" : "⏳ Chưa xong"}</td>
+  `;
+
+  taskList.appendChild(tr);
 });
