@@ -1,24 +1,49 @@
 body {
-  font-family: Arial;
+  font-family: Arial, sans-serif;
   padding: 20px;
 }
 
+h2 {
+  margin-bottom: 10px;
+}
+
+.form {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+input, select, button {
+  padding: 6px;
+  font-size: 14px;
+}
+
+button {
+  cursor: pointer;
+}
+
 table {
-  border-collapse: collapse;
   width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
 }
 
 th, td {
-  border: 1px solid #444;
+  border: 1px solid #aaa;
   padding: 8px;
+  min-height: 40px;
   text-align: center;
 }
 
 th {
-  background: #eee;
+  background: #f0f0f0;
 }
 
-.done {
-  text-decoration: line-through;
-  color: green;
+td {
+  background: #fafafa;
+}
+
+.empty {
+  color: #bbb;
+  font-style: italic;
 }
