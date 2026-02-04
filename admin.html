@@ -1,62 +1,39 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>Admin - Phân công công việc</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Admin</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<h2>Quản lý công việc</h2>
 
-<h2>📋 BẢNG PHÂN CÔNG CÔNG VIỆC TUẦN</h2>
+<div class="toolbar">
+  <input id="taskName" placeholder="Tên công việc">
+  <select id="assignee">
+    <option value="Thiên">Thiên</option>
+    <option value="Minh">Minh</option>
+  </select>
+  <button onclick="addTask()">➕ Thêm</button>
+</div>
 
 <table id="taskTable">
   <thead>
     <tr>
-      <th>Nhân viên</th>
-      <th>Thứ 2</th>
-      <th>Thứ 3</th>
-      <th>Thứ 4</th>
-      <th>Thứ 5</th>
-      <th>Thứ 6</th>
-      <th>Thứ 7</th>
-      <th>CN</th>
+      <th>Tên</th>
+      <th>T2</th><th>T3</th><th>T4</th><th>T5</th>
+      <th>T6</th><th>T7</th><th>CN</th>
       <th>Ghi chú</th>
+      <th>Xóa</th>
     </tr>
   </thead>
-
-  <tbody>
-    <tr data-id="emp_001">
-      <td>emp1</td>
-      <td><input></td>
-      <td><input></td>
-      <td><input></td>
-      <td><input></td>
-      <td><input></td>
-      <td><input></td>
-      <td><input></td>
-      <td><input></td>
-    </tr>
-
-    <tr data-id="emp_002">
-      <td>emp2</td>
-      <td><input></td>
-      <td><input></td>
-      <td><input></td>
-      <td><input></td>
-      <td><input></td>
-      <td><input></td>
-      <td><input></td>
-      <td><input></td>
-    </tr>
-  </tbody>
+  <tbody></tbody>
 </table>
 
-<button onclick="saveAll()">💾 Lưu phân công</button>
-<button onclick="logout()">🚪 Đăng xuất</button>
+<button onclick="logout()">Đăng xuất</button>
 
 <script src="auth.js"></script>
 <script type="module" src="admin.js"></script>
 <script>requireRole("admin")</script>
-
 </body>
 </html>
