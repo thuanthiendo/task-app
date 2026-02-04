@@ -1,4 +1,4 @@
-// ===== FIREBASE =====
+// 🔥 Firebase config (GIỮ NGUYÊN CỦA BẠN)
 const firebaseConfig = {
   apiKey: "AIzaSyB-ldnW85PPEL3Y4SAbWEotRvmTLtzgq8o",
   authDomain: "task-75413.firebaseapp.com",
@@ -11,79 +11,69 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// ===== LOGIN =====
-function login() {
-  const name = document.getElementById("name").value.trim();
-  if (!name) return alert("Nhập tên");
-  localStorage.setItem("username", name);
-  window.location.href = "board.html";
-}
-
-// ===== ADMIN ADD =====
+// ================= ADD TASK =================
 function addTask() {
-  const employee = document.getElementById("employee").value.trim();
-  const day = document.getElementById("day").value;
-  const task = document.getElementById("task").value.trim();
+  const employee = employeeInput.value.trim();
+  const day = dayInput.value;
+  const task = taskInput.value.trim();
 
-  if (!employee || !task) return alert("Nhập đủ");
+  if (!employee || !task) {
+    alert("Nhập đầy đủ thông tin");
+    return;
+  }
 
   db.collection("tasks").add({
     employee,
     day,
     task,
     done: false,
-    note: "",
-    time: new Date().toLocaleString()
+    updated: new Date().toLocaleString()
   });
 
-  document.getElementById("task").value = "";
+  taskInput.value = "";
 }
 
-// ===== BOARD =====
-const body = document.getElementById("tableBody");
-if (body) {
-  db.collection("tasks").onSnapshot(snapshot => {
-    const data = {};
+// ================= RENDER TABLE =================
+const days = ["Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7"];
 
-    snapshot.forEach(doc => {
-      const d = doc.data();
-      if (!data[d.employee]) {
-        data[d.employee] = {
-          "Thứ 2": "", "Thứ 3": "", "Thứ 4": "",
-          "Thứ 5": "", "Thứ 6": "", "Thứ 7": "",
-          note: ""
-        };
-      }
-
-      data[d.employee][d.day] =
-        `<label>
-          <input type="checkbox" ${d.done ? "checked" : ""}
-            onchange="toggle('${doc.id}', this.checked)">
-          ${d.task}
-        </label>`;
-    });
-
-    body.innerHTML = "";
-    Object.keys(data).forEach(name => {
-      body.innerHTML += `
-        <tr>
-          <td>${name}</td>
-          <td>${data[name]["Thứ 2"]}</td>
-          <td>${data[name]["Thứ 3"]}</td>
-          <td>${data[name]["Thứ 4"]}</td>
-          <td>${data[name]["Thứ 5"]}</td>
-          <td>${data[name]["Thứ 6"]}</td>
-          <td>${data[name]["Thứ 7"]}</td>
-          <td></td>
-        </tr>
-      `;
-    });
+db.collection("tasks").onSnapshot(snapshot => {
+  const data = {};
+  
+  snapshot.forEach(doc => {
+    const d = doc.data();
+    if (!data[d.employee]) {
+      data[d.employee] = {};
+      days.forEach(day => data[d.employee][day] = "");
+      data[d.employee].note = "";
+    }
+    data[d.employee][d.day] = d.task;
+    data[d.employee].note = d.updated;
   });
-}
 
-function toggle(id, v) {
-  db.collection("tasks").doc(id).update({
-    done: v,
-    time: new Date().toLocaleString()
-  });
+  renderTable(data);
+});
+
+function renderTable(data) {
+  const tbody = document.getElementById("tableBody");
+  tbody.innerHTML = "";
+
+  if (Object.keys(data).length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" style="text-align:center;color:#888">
+          Chưa có nhiệm vụ
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  for (const emp in data) {
+    let row = `<tr><td><b>${emp}</b></td>`;
+    days.forEach(day => {
+      row += `<td>${data[emp][day] || "—"}</td>`;
+    });
+    row += `<td>${data[emp].note}</td></tr>`;
+    tbody.innerHTML += row;
+  }
 }
