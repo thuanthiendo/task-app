@@ -4,30 +4,17 @@
   <meta charset="UTF-8">
   <title>Admin</title>
 </head>
-<body>
+<body data-role="admin">
 
-<h2>Trang Admin</h2>
-<p id="welcome"></p>
-
+<h1>Trang Admin</h1>
 <button onclick="logout()">Đăng xuất</button>
 
+<script src="script.js"></script>
 <script>
-  const role = sessionStorage.getItem("role");
-  const username = sessionStorage.getItem("username");
-
-  if (role !== "admin") {
-    alert("Không có quyền truy cập");
-    window.location.href = "index.html";
-  }
-
-  document.getElementById("welcome").innerText =
-    "Xin chào admin: " + username;
-
-  function logout() {
-    sessionStorage.clear();
-    window.location.href = "index.html";
-  }
+function logout() {
+  localStorage.clear();
+  window.location.href = "index.html";
+}
 </script>
-
 </body>
 </html>
