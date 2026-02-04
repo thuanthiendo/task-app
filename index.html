@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <title>Đăng nhập</title>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -11,7 +16,7 @@
 <input id="email" placeholder="Email"><br><br>
 <input id="password" type="password" placeholder="Mật khẩu"><br><br>
 
-<button id="loginBtn">Đăng nhập</button>
+<button onclick="login()">Đăng nhập</button>
 
 <script src="app.js"></script>
 </body>
