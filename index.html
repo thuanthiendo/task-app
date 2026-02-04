@@ -1,31 +1,35 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Bảng phân công công việc</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <h2>Thêm nhiệm vụ</h2>
 
-<input id="employee" placeholder="Tên nhân viên" />
-<select id="day">
-  <option>Thứ 2</option>
-  <option>Thứ 3</option>
-  <option>Thứ 4</option>
-  <option>Thứ 5</option>
-  <option>Thứ 6</option>
-  <option>Thứ 7</option>
-</select>
-<input id="task" placeholder="Nhiệm vụ" />
-<button onclick="addTask()">➕ Thêm</button>
+<div class="form">
+  <input id="nameInput" placeholder="Tên nhân viên">
+  
+  <select id="dayInput">
+    <option>Thứ 2</option>
+    <option>Thứ 3</option>
+    <option>Thứ 4</option>
+    <option>Thứ 5</option>
+    <option>Thứ 6</option>
+    <option>Thứ 7</option>
+  </select>
+
+  <input id="taskInput" placeholder="Nhiệm vụ">
+  <button onclick="addTask()">➕ Thêm</button>
+</div>
 
 <hr>
 
-<h2>Bảng thời khóa biểu</h2>
+<h2>Bảng thời khóa biểu công việc</h2>
 
-<table border="1" cellpadding="10">
+<table>
   <thead>
     <tr>
       <th>Nhân viên</th>
@@ -35,13 +39,14 @@
       <th>Thứ 5</th>
       <th>Thứ 6</th>
       <th>Thứ 7</th>
-      <th>Ghi chú</th>
     </tr>
   </thead>
-  <tbody id="tableBody"></tbody>
+  <tbody id="tableBody">
+    <!-- JS sẽ đổ dữ liệu -->
+  </tbody>
 </table>
 
-<!-- FIREBASE -->
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
