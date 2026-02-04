@@ -1,20 +1,22 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>Nhân viên</title>
+  <title>Employee</title>
 </head>
-<body data-role="employee">
+<body>
 
-<h1>Trang Nhân viên</h1>
+<h2>Công việc của tôi</h2>
+<ul id="taskList"></ul>
+
 <button onclick="logout()">Đăng xuất</button>
 
-<script src="script.js"></script>
+<script src="auth.js"></script>
+<script type="module" src="employee.js"></script>
+
 <script>
-function logout() {
-  localStorage.clear();
-  window.location.href = "index.html";
-}
+  requireRole("employee");
 </script>
+
 </body>
 </html>
