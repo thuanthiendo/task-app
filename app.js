@@ -9,17 +9,29 @@ const db = firebase.firestore();
 const auth = firebase.auth();
 
 function login() {
-  auth.signInWithEmailAndPassword(
-    email.value,
-    password.value
-  ).then(u => {
-    if (u.user.email.includes("admin")) {
-      location.href = "admin.html";
-    } else {
-      location.href = "employee.html";
-    }
-  });
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  if (!email || !password) {
+    alert("Nhập email và mật khẩu");
+    return;
+  }
+
+  firebase.auth()
+    .signInWithEmailAndPassword(email, password)
+    .then(user => {
+      if (email.includes("admin")) {
+        window.location.href = "admin.html";
+      } else {
+        window.location.href = "employee.html";
+      }
+    })
+    .catch(err => {
+      alert("Lỗi đăng nhập: " + err.message);
+      console.error(err);
+    });
 }
+
 
 function addTask() {
   const name = empName.value;
