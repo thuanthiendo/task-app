@@ -1,4 +1,4 @@
-// ===== FIREBASE CONFIG =====
+// ===== FIREBASE =====
 const firebaseConfig = {
   apiKey: "AIzaSyB-ldnW85PPEL3Y4SAbWEotRvmTLtzgq8o",
   authDomain: "task-75413.firebaseapp.com",
@@ -11,32 +11,31 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// ================= LOGIN =================
+// ===== LOGIN =====
 function login() {
-  const email = document.getElementById("email").value.trim();
-
-  if (!email) {
-    alert("Nhập tên hoặc email");
+  const name = document.getElementById("name").value.trim();
+  if (!name) {
+    alert("Nhập tên!");
     return;
   }
 
-  localStorage.setItem("user", email);
+  localStorage.setItem("username", name);
 
-  if (email === "admin@gmail.com") {
+  if (name.toLowerCase() === "admin") {
     window.location.href = "admin.html";
   } else {
     window.location.href = "task.html";
   }
 }
 
-// ================= ADMIN =================
+// ===== ADMIN: THÊM NHIỆM VỤ =====
 function addTask() {
   const employee = document.getElementById("employee").value.trim();
   const day = document.getElementById("day").value;
   const task = document.getElementById("task").value.trim();
 
   if (!employee || !task) {
-    alert("Nhập đầy đủ thông tin");
+    alert("Nhập đủ thông tin!");
     return;
   }
 
@@ -51,53 +50,63 @@ function addTask() {
   document.getElementById("task").value = "";
 }
 
-// Hiển thị danh sách cho admin
-if (document.getElementById("taskTable")) {
-  db.collection("tasks").orderBy("time", "desc")
-    .onSnapshot(snapshot => {
-      const table = document.getElementById("taskTable");
-      table.innerHTML = "";
-      snapshot.forEach(doc => {
-        const d = doc.data();
-        table.innerHTML += `
-          <tr>
-            <td>${d.employee}</td>
-            <td>${d.day}</td>
-            <td>${d.task}</td>
-            <td>${d.done ? "✅ Xong" : "⏳ Đang làm"}</td>
-          </tr>
-        `;
-      });
+// ===== ADMIN: HIỂN THỊ + XOÁ =====
+const table = document.getElementById("taskTable");
+if (table) {
+  db.collection("tasks").orderBy("time", "desc").onSnapshot(snapshot => {
+    table.innerHTML = "";
+    snapshot.forEach(doc => {
+      const d = doc.data();
+      table.innerHTML += `
+        <tr>
+          <td>${d.employee}</td>
+          <td>${d.day}</td>
+          <td>${d.task}</td>
+          <td>${d.done ? "✅ Xong" : "⏳ Chưa xong"}</td>
+          <td>
+            <button onclick="deleteTask('${doc.id}')">❌</button>
+          </td>
+        </tr>
+      `;
     });
+  });
 }
 
-// ================= NHÂN VIÊN =================
-if (document.getElementById("myTasks")) {
-  const user = localStorage.getItem("user");
+function deleteTask(id) {
+  if (confirm("Xoá nhiệm vụ?")) {
+    db.collection("tasks").doc(id).delete();
+  }
+}
 
-  db.collection("tasks")
-    .where("employee", "==", user)
-    .onSnapshot(snapshot => {
-      const box = document.getElementById("myTasks");
-      box.innerHTML = "";
+// ===== NHÂN VIÊN =====
+const box = document.getElementById("myTasks");
+if (box) {
+  const name = localStorage.getItem("username");
+  if (!name) {
+    box.innerHTML = "Chưa đăng nhập";
+  } else {
+    db.collection("tasks")
+      .where("employee", "==", name)
+      .onSnapshot(snapshot => {
+        if (snapshot.empty) {
+          box.innerHTML = "Chưa có nhiệm vụ";
+          return;
+        }
 
-      if (snapshot.empty) {
-        box.innerHTML = "<p>Chưa có nhiệm vụ</p>";
-      }
-
-      snapshot.forEach(doc => {
-        const d = doc.data();
-        box.innerHTML += `
-          <div style="margin-bottom:10px">
-            <input type="checkbox"
-              ${d.done ? "checked" : ""}
-              onchange="toggleTask('${doc.id}', this.checked)">
-            <b>${d.day}</b> - ${d.task}
-            <small>(${d.time})</small>
-          </div>
-        `;
+        box.innerHTML = "";
+        snapshot.forEach(doc => {
+          const d = doc.data();
+          box.innerHTML += `
+            <div>
+              <input type="checkbox" ${d.done ? "checked" : ""}
+                onchange="toggleTask('${doc.id}', this.checked)">
+              <b>${d.day}</b> – ${d.task}
+              <small>(${d.time})</small>
+            </div>
+          `;
+        });
       });
-    });
+  }
 }
 
 function toggleTask(id, value) {
