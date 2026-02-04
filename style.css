@@ -1,15 +1,38 @@
 body {
-  font-family: Arial;
-  text-align: center;
-  margin-top: 80px;
+  font-family: Arial, sans-serif;
+  padding: 20px;
 }
 
-input {
-  display: block;
-  margin: 10px auto;
-  padding: 8px;
+h2 {
+  margin-bottom: 15px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  overflow-x: auto;
+}
+
+th, td {
+  border: 1px solid #333;
+  padding: 6px;
+  text-align: center;
+}
+
+th {
+  background: #f2f2f2;
+}
+
+td input {
+  width: 100%;
+  border: none;
+  outline: none;
+  text-align: center;
 }
 
 button {
+  margin-top: 15px;
   padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
 }
