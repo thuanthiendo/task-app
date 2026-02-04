@@ -1,7 +1,88 @@
-<h2>Bảng phân công công việc</h2>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Bảng phân công công việc</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
 
-<table border="1" width="100%">
-  <thead>
+h2 {
+  margin-bottom: 10px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  border: 1px solid #999;
+  padding: 8px;
+  text-align: center;
+}
+
+th {
+  background: #f0f0f0;
+}
+
+button {
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+#login, #board {
+  max-width: 1100px;
+  margin: auto;
+}
+
+#admin-actions {
+  margin-bottom: 10px;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+  background: #fff;
+  width: 400px;
+  padding: 15px;
+  margin: 10% auto;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+}
+
+.check-item {
+  text-align: left;
+}
+</style>
+</head>
+
+<body>
+
+<div id="login">
+  <h2>Đăng nhập</h2>
+  <input id="user" placeholder="Tài khoản"><br><br>
+  <input id="pass" type="password" placeholder="Mật khẩu"><br><br>
+  <button onclick="login()">Đăng nhập</button>
+</div>
+
+<div id="board" style="display:none">
+  <h2>Bảng phân công công việc</h2>
+
+  <div id="admin-actions" style="display:none">
+    <button onclick="addEmployee()">➕ Thêm nhân viên</button>
+  </div>
+
+  <table id="taskTable">
     <tr>
       <th>Nhân viên</th>
       <th>Thứ 2</th>
@@ -12,8 +93,150 @@
       <th>Thứ 7</th>
       <th>Ghi chú</th>
     </tr>
-  </thead>
-  <tbody id="schedule"></tbody>
-</table>
+  </table>
+</div>
 
-<script type="module" src="script.js"></script>
+<!-- MODAL -->
+<div class="modal" id="taskModal">
+  <div class="modal-content">
+    <h3 id="modalTitle"></h3>
+    <div id="checklist"></div>
+    <br>
+    <button onclick="addTask()">➕ Thêm nhiệm vụ</button>
+    <button onclick="closeModal()">Đóng</button>
+  </div>
+</div>
+
+<script>
+const users = {
+  admin: { pass: "123", role: "admin" },
+  thien: { pass: "123", role: "user" }
+};
+
+let currentUser = null;
+let data = JSON.parse(localStorage.getItem("taskData")) || {};
+let currentKey = "";
+
+function login() {
+  const u = user.value;
+  const p = pass.value;
+
+  if (!users[u] || users[u].pass !== p) {
+    alert("Sai tài khoản hoặc mật khẩu");
+    return;
+  }
+
+  currentUser = { name: u, role: users[u].role };
+  login.style.display = "none";
+  board.style.display = "block";
+
+  if (currentUser.role === "admin") {
+    adminActions.style.display = "block";
+  }
+
+  renderTable();
+}
+
+function save() {
+  localStorage.setItem("taskData", JSON.stringify(data));
+}
+
+function addEmployee() {
+  const name = prompt("Tên nhân viên:");
+  if (!name) return;
+
+  if (!data[name]) data[name] = {};
+  save();
+  renderTable();
+}
+
+function renderTable() {
+  const table = document.getElementById("taskTable");
+  table.innerHTML = table.rows[0].outerHTML;
+
+  Object.keys(data).forEach(name => {
+    if (currentUser.role !== "admin" && currentUser.name !== name) return;
+
+    const row = table.insertRow();
+    row.insertCell().innerText = name;
+
+    for (let d = 2; d <= 7; d++) {
+      const cell = row.insertCell();
+      cell.innerHTML = `<button onclick="openTask('${name}','${d}')">Xem</button>`;
+    }
+
+    const note = row.insertCell();
+    note.innerText = data[name].note || "";
+  });
+}
+
+function openTask(name, day) {
+  currentKey = name + "_" + day;
+  if (!data[name][day]) data[name][day] = [];
+
+  modalTitle.innerText = `${name} - Thứ ${day}`;
+  renderChecklist(name, day);
+  taskModal.style.display = "block";
+}
+
+function renderChecklist(name, day) {
+  const box = document.getElementById("checklist");
+  box.innerHTML = "";
+
+  const list = data[name][day];
+
+  list.forEach((t, i) => {
+    const div = document.createElement("div");
+    div.className = "check-item";
+    div.innerHTML = `
+      <input type="checkbox" ${t.done ? "checked" : ""} 
+        onchange="toggleTask('${name}','${day}',${i})">
+      ${t.text}
+    `;
+    box.appendChild(div);
+  });
+
+  updateNote(name);
+}
+
+function addTask() {
+  if (currentUser.role !== "admin") return;
+
+  const text = prompt("Nội dung nhiệm vụ:");
+  if (!text) return;
+
+  const [name, day] = currentKey.split("_");
+  data[name][day].push({ text, done: false });
+  save();
+  renderChecklist(name, day);
+}
+
+function toggleTask(name, day, i) {
+  data[name][day][i].done = !data[name][day][i].done;
+  save();
+  renderChecklist(name, day);
+}
+
+function updateNote(name) {
+  let total = 0, done = 0;
+
+  Object.values(data[name]).forEach(day => {
+    if (Array.isArray(day)) {
+      total += day.length;
+      done += day.filter(t => t.done).length;
+    }
+  });
+
+  const percent = total ? Math.round(done / total * 100) : 0;
+  data[name].note = `${percent}% - cập nhật ${new Date().toLocaleString()}`;
+  save();
+  renderTable();
+}
+
+function closeModal() {
+  taskModal.style.display = "none";
+}
+</script>
+
+</body>
+</html>
