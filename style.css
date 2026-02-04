@@ -1,20 +1,29 @@
-body { font-family: Arial; padding: 20px; }
-table { border-collapse: collapse; width: 100%; }
+body {
+  font-family: Arial;
+  padding: 20px;
+}
+
+input, select, button {
+  padding: 6px;
+  margin: 4px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 10px;
+}
+
 th, td {
-  border: 1px solid #999;
+  border: 1px solid #333;
   padding: 6px;
   text-align: center;
 }
-th { background: #eee; }
 
-.toolbar { margin-bottom: 10px; }
-input, select, button { padding: 6px; }
-
-.center {
-  display:flex; justify-content:center; align-items:center; height:100vh;
+th {
+  background: #f0f0f0;
 }
-.card {
-  border:1px solid #ccc;
-  padding:20px;
-  width:250px;
+
+.control {
+  margin-bottom: 10px;
 }
