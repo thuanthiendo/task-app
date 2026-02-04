@@ -1,35 +1,36 @@
 body {
-  font-family: Arial, sans-serif;
+  font-family: Arial;
   padding: 20px;
 }
 
-input, select, button {
-  padding: 6px;
-  margin: 4px;
+#addTaskBox {
+  margin-bottom: 15px;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 15px;
 }
 
 th, td {
-  border: 1px solid #333;
-  padding: 6px;
+  border: 1px solid #ccc;
+  height: 120px;
   vertical-align: top;
-  text-align: center;
+  padding: 5px;
 }
 
 .task {
   background: #e3f2fd;
-  margin: 4px 0;
+  margin-bottom: 5px;
   padding: 4px;
   border-radius: 4px;
-  font-size: 14px;
 }
 
 .done {
   text-decoration: line-through;
-  background: #c8e6c9;
+  opacity: 0.6;
+}
+
+button {
+  cursor: pointer;
 }
