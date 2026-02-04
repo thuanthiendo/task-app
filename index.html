@@ -7,49 +7,44 @@
 </head>
 <body>
 
-  <h2>Thêm nhiệm vụ</h2>
+<h2>Thêm nhiệm vụ</h2>
 
-  <div class="form">
-    <input type="text" id="nameInput" placeholder="Tên nhân viên" />
-    
-    <select id="dayInput">
-      <option>Thứ 2</option>
-      <option>Thứ 3</option>
-      <option>Thứ 4</option>
-      <option>Thứ 5</option>
-      <option>Thứ 6</option>
-      <option>Thứ 7</option>
-    </select>
+<input id="employee" placeholder="Tên nhân viên" />
+<select id="day">
+  <option>Thứ 2</option>
+  <option>Thứ 3</option>
+  <option>Thứ 4</option>
+  <option>Thứ 5</option>
+  <option>Thứ 6</option>
+  <option>Thứ 7</option>
+</select>
+<input id="task" placeholder="Nhiệm vụ" />
+<button onclick="addTask()">➕ Thêm</button>
 
-    <input type="text" id="taskInput" placeholder="Nhiệm vụ" />
-    <button onclick="addTask()">➕ Thêm</button>
-  </div>
+<hr>
 
-  <hr />
+<h2>Bảng thời khóa biểu</h2>
 
+<table border="1" cellpadding="10">
+  <thead>
+    <tr>
+      <th>Nhân viên</th>
+      <th>Thứ 2</th>
+      <th>Thứ 3</th>
+      <th>Thứ 4</th>
+      <th>Thứ 5</th>
+      <th>Thứ 6</th>
+      <th>Thứ 7</th>
+      <th>Ghi chú</th>
+    </tr>
+  </thead>
+  <tbody id="tableBody"></tbody>
+</table>
 
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-  <table id="schedule">
-    <thead>
-      <tr>
-        <th>Nhân viên</th>
-        <th>Thứ 2</th>
-        <th>Thứ 3</th>
-        <th>Thứ 4</th>
-        <th>Thứ 5</th>
-        <th>Thứ 6</th>
-        <th>Thứ 7</th>
-        <th>Ghi chú</th>
-      </tr>
-    </thead>
-    <tbody id="tableBody"></tbody>
-  </table>
-
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
-  <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
-
