@@ -1,12 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
   <meta charset="UTF-8">
   <title>Admin</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>Thêm nhiệm vụ</h1>
+<h1>Bảng phân công công việc</h1>
+
+<h2>Thêm nhiệm vụ</h2>
 
 <input id="employee" placeholder="Tên nhân viên">
 <select id="day">
@@ -18,10 +21,13 @@
   <option>Thứ 7</option>
 </select>
 <input id="task" placeholder="Nhiệm vụ">
-<button onclick="addTask()">Thêm nhiệm vụ</button>
+
+<!-- 🔥 QUAN TRỌNG: type="button" -->
+<button type="button" onclick="addTask()">➕ Thêm nhiệm vụ</button>
 
 <h2>Danh sách nhiệm vụ</h2>
-<table border="1">
+
+<table border="1" width="100%">
   <thead>
     <tr>
       <th>Nhân viên</th>
