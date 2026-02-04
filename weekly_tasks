@@ -1,0 +1,15 @@
+{
+  "employeeId": "emp_001",
+  "employeeName": "emp1",
+  "week": "2026-W06",
+  "tasks": {
+    "mon": "Làm báo cáo",
+    "tue": "Họp team",
+    "wed": "",
+    "thu": "",
+    "fri": "",
+    "sat": "",
+    "sun": ""
+  },
+  "note": "Ưu tiên gấp"
+}
