@@ -1,38 +1,20 @@
-body {
-  font-family: Arial, sans-serif;
-  padding: 20px;
-}
-
-h2 {
-  margin-bottom: 15px;
-}
-
-table {
-  border-collapse: collapse;
-  width: 100%;
-  overflow-x: auto;
-}
-
+body { font-family: Arial; padding: 20px; }
+table { border-collapse: collapse; width: 100%; }
 th, td {
-  border: 1px solid #333;
+  border: 1px solid #999;
   padding: 6px;
   text-align: center;
 }
+th { background: #eee; }
 
-th {
-  background: #f2f2f2;
+.toolbar { margin-bottom: 10px; }
+input, select, button { padding: 6px; }
+
+.center {
+  display:flex; justify-content:center; align-items:center; height:100vh;
 }
-
-td input {
-  width: 100%;
-  border: none;
-  outline: none;
-  text-align: center;
-}
-
-button {
-  margin-top: 15px;
-  padding: 8px 16px;
-  font-size: 14px;
-  cursor: pointer;
+.card {
+  border:1px solid #ccc;
+  padding:20px;
+  width:250px;
 }
