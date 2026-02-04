@@ -1,4 +1,6 @@
-// 🔥 DÁN firebaseConfig CỦA BẠN
+/**************************************************
+ * 🔥 FIREBASE CONFIG
+ **************************************************/
 const firebaseConfig = {
   apiKey: "AIzaSyB-ldnW85PPEL3Y4SAbWEotRvmTLtzgq8o",
   authDomain: "task-75413.firebaseapp.com",
@@ -8,27 +10,81 @@ const firebaseConfig = {
   appId: "1:934934617374:web:71ed6700a713351a72fd0f"
 };
 
-firebase.initializeApp(firebaseConfig);
+// Init Firebase (tránh init nhiều lần)
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
 const db = firebase.firestore();
 
-// ================= LOGIN =================
+/**************************************************
+ * 🔐 LOGIN
+ **************************************************/
 function login() {
-  const email = document.getElementById("email").value;
+  const emailInput = document.getElementById("email");
+  if (!emailInput) return;
 
+  const email = emailInput.value.trim();
+
+  if (!email) {
+    alert("Vui lòng nhập email");
+    return;
+  }
+
+  // ADMIN
   if (email === "admin@gmail.com") {
-    localStorage.setItem("user", "admin");
+    localStorage.setItem("role", "admin");
+    localStorage.setItem("user", email);
     window.location.href = "admin.html";
-  } else {
+  }
+  // NHÂN VIÊN
+  else {
+    localStorage.setItem("role", "staff");
     localStorage.setItem("user", email);
     window.location.href = "task.html";
   }
 }
 
-// ================= ADMIN =================
+/**************************************************
+ * 👑 ADMIN PAGE
+ **************************************************/
+if (document.getElementById("taskTable")) {
+  // Chặn nếu không phải admin
+  if (localStorage.getItem("role") !== "admin") {
+    alert("Bạn không có quyền truy cập");
+    window.location.href = "index.html";
+  }
+
+  // Lắng nghe realtime
+  db.collection("tasks")
+    .orderBy("time", "desc")
+    .onSnapshot(snapshot => {
+      const table = document.getElementById("taskTable");
+      table.innerHTML = "";
+
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        table.innerHTML += `
+          <tr>
+            <td>${d.employee}</td>
+            <td>${d.day}</td>
+            <td>${d.task}</td>
+            <td>${d.done ? "✅ Hoàn thành" : "⏳ Đang làm"}</td>
+          </tr>
+        `;
+      });
+    });
+}
+
+// Thêm nhiệm vụ
 function addTask() {
-  const employee = document.getElementById("employee").value;
-  const day = document.getElementById("day").value;
-  const task = document.getElementById("task").value;
+  const employee = document.getElementById("employee")?.value.trim();
+  const day = document.getElementById("day")?.value;
+  const task = document.getElementById("task")?.value.trim();
+
+  if (!employee || !task) {
+    alert("Nhập đầy đủ tên nhân viên và nhiệm vụ");
+    return;
+  }
 
   db.collection("tasks").add({
     employee,
@@ -36,50 +92,49 @@ function addTask() {
     task,
     done: false,
     time: new Date().toLocaleString()
+  }).then(() => {
+    document.getElementById("task").value = "";
   });
 }
 
-if (document.getElementById("taskTable")) {
-  db.collection("tasks").onSnapshot(snapshot => {
-    const table = document.getElementById("taskTable");
-    table.innerHTML = "";
-    snapshot.forEach(doc => {
-      const d = doc.data();
-      table.innerHTML += `
-        <tr>
-          <td>${d.employee}</td>
-          <td>${d.day}</td>
-          <td>${d.task}</td>
-          <td>${d.done ? "✅ Xong" : "⏳ Chưa xong"}</td>
-        </tr>
-      `;
-    });
-  });
-}
-
-// ================= NHÂN VIÊN =================
+/**************************************************
+ * 👷 NHÂN VIÊN PAGE
+ **************************************************/
 if (document.getElementById("myTasks")) {
   const user = localStorage.getItem("user");
+
+  if (!user) {
+    alert("Bạn chưa đăng nhập");
+    window.location.href = "index.html";
+  }
 
   db.collection("tasks")
     .where("employee", "==", user)
     .onSnapshot(snapshot => {
       const box = document.getElementById("myTasks");
       box.innerHTML = "";
+
+      if (snapshot.empty) {
+        box.innerHTML = "<p>📭 Chưa có nhiệm vụ</p>";
+        return;
+      }
+
       snapshot.forEach(doc => {
         const d = doc.data();
         box.innerHTML += `
-          <div>
-            <input type="checkbox" ${d.done ? "checked" : ""}
+          <div style="margin-bottom:10px">
+            <input type="checkbox"
+              ${d.done ? "checked" : ""}
               onchange="toggleTask('${doc.id}', this.checked)">
-            <b>${d.day}</b> - ${d.task}
-            <small>(${d.time})</small>
+            <b>${d.day}</b> - ${d.task}<br>
+            <small>⏰ ${d.time}</small>
           </div>
         `;
       });
     });
 }
 
+// Cập nhật trạng thái
 function toggleTask(id, value) {
   db.collection("tasks").doc(id).update({
     done: value,
