@@ -1,4 +1,3 @@
-// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyB-ldnW85PPEL3Y4SAbWEotRvmTLtzgq8o",
   authDomain: "task-75413.firebaseapp.com",
@@ -10,11 +9,10 @@ const db = firebase.firestore();
 
 const days = ["Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7","CN"];
 
-// ================= ADD TASK =================
 function addTask() {
-  const name = nameInput.value.trim();
-  const day = dayInput.value;
-  const text = taskInput.value.trim();
+  const name = document.getElementById("nameInput").value.trim();
+  const day = document.getElementById("dayInput").value;
+  const text = document.getElementById("taskInput").value.trim();
 
   if (!name || !text) {
     alert("Nhập đủ tên và nhiệm vụ");
@@ -26,14 +24,14 @@ function addTask() {
     day,
     text,
     done: false,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    createdAt: Date.now() // 🔥 FIX: không dùng serverTimestamp
   });
 
-  taskInput.value = "";
+  document.getElementById("taskInput").value = "";
 }
 
-// ================= RENDER TABLE =================
-db.collection("tasks").orderBy("createdAt").onSnapshot(snapshot => {
+// 🔥 KHÔNG orderBy
+db.collection("tasks").onSnapshot(snapshot => {
   const data = {};
 
   snapshot.forEach(doc => {
@@ -47,7 +45,8 @@ db.collection("tasks").orderBy("createdAt").onSnapshot(snapshot => {
 });
 
 function renderTable(data) {
-  tableBody.innerHTML = "";
+  const body = document.getElementById("tableBody");
+  body.innerHTML = "";
 
   Object.keys(data).forEach(name => {
     const tr = document.createElement("tr");
@@ -61,26 +60,24 @@ function renderTable(data) {
 
       (data[name][day] || []).forEach(t => {
         const div = document.createElement("div");
-        div.className = "task";
-
         div.innerHTML = `
           <input type="checkbox" ${t.done ? "checked" : ""}
             onchange="toggleDone('${t.id}', this.checked)">
-          <span class="${t.done ? "done" : ""}">${t.text}</span>
+          <span style="${t.done ? "text-decoration:line-through" : ""}">
+            ${t.text}
+          </span>
           <button onclick="deleteTask('${t.id}')">❌</button>
         `;
-
         td.appendChild(div);
       });
 
       tr.appendChild(td);
     });
 
-    tableBody.appendChild(tr);
+    body.appendChild(tr);
   });
 }
 
-// ================= ACTIONS =================
 function toggleDone(id, value) {
   db.collection("tasks").doc(id).update({ done: value });
 }
