@@ -7,37 +7,12 @@
 </head>
 <body>
 
-<h2>Admin – Bảng thời khóa biểu</h2>
+<h2>📅 Thời khóa biểu (Admin)</h2>
 
-<div class="form">
-  <input id="employee" placeholder="Tên nhân viên">
-  <select id="day">
-    <option>Thứ 2</option>
-    <option>Thứ 3</option>
-    <option>Thứ 4</option>
-    <option>Thứ 5</option>
-    <option>Thứ 6</option>
-    <option>Thứ 7</option>
-  </select>
-  <input id="task" placeholder="Nhiệm vụ">
-  <button onclick="addTask()">➕ Thêm nhiệm vụ</button>
-</div>
+<table id="schedule"></table>
 
-<table>
-  <thead>
-    <tr>
-      <th>Nhân viên</th>
-      <th>Thứ 2</th>
-      <th>Thứ 3</th>
-      <th>Thứ 4</th>
-      <th>Thứ 5</th>
-      <th>Thứ 6</th>
-      <th>Thứ 7</th>
-    </tr>
-  </thead>
-  <tbody id="schedule"></tbody>
-</table>
+<button onclick="addRow()">➕ Thêm nhân viên</button>
 
-<script src="script.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
