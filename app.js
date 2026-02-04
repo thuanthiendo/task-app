@@ -1,36 +1,35 @@
-console.log("APP.JS ĐÃ CHẠY");
+const tbody = document.querySelector("#taskTable tbody");
 
-const btn = document.getElementById("addTaskBtn");
-const nameInput = document.getElementById("nameInput");
-const taskInput = document.getElementById("taskInput");
-const daySelect = document.getElementById("daySelect");
-const table = document.getElementById("taskTable");
-
-btn.onclick = () => {
+function addTask() {
   const name = nameInput.value.trim();
-  const task = taskInput.value.trim();
-  const day = Number(daySelect.value);
+  const taskText = taskInput.value.trim();
+  const day = daySelect.value;
 
-  if (!name || !task) {
-    alert("Nhập đủ tên và nhiệm vụ");
-    return;
+  if (!name || !taskText) return alert("Nhập đủ tên và nhiệm vụ");
+
+  let row = [...tbody.rows].find(r => r.dataset.name === name);
+
+  if (!row) {
+    row = tbody.insertRow();
+    row.dataset.name = name;
+
+    for (let i = 0; i < 8; i++) row.insertCell();
+
+    row.cells[0].innerText = name;
   }
 
-  const rows = table.querySelectorAll("tr");
+  const cell = row.cells[day];
+  const task = document.createElement("div");
+  task.className = "task";
+  task.innerHTML = `
+    <span onclick="toggleDone(this)">${taskText}</span>
+    <button onclick="this.parentElement.remove()">❌</button>
+  `;
 
-  for (let row of rows) {
-    const cell = row.children[day];
-    if (cell.innerHTML === "") {
-      cell.innerHTML = `
-        <b>${name}</b><br>
-        ${task}<br>
-        <button onclick="this.parentElement.style.opacity='0.4'">✔</button>
-        <button onclick="this.parentElement.innerHTML=''">❌</button>
-      `;
-      taskInput.value = "";
-      return;
-    }
-  }
+  cell.appendChild(task);
+  taskInput.value = "";
+}
 
-  alert("Cột này đã đầy");
-};
+function toggleDone(span) {
+  span.parentElement.classList.toggle("done");
+}
