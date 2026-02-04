@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Đăng nhập</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<div class="box">
-  <h2>🔐 Đăng nhập</h2>
-  <input id="email" placeholder="Email">
-  <button onclick="login()">Đăng nhập</button>
-</div>
+<h2>🔐 Đăng nhập</h2>
 
+<input id="email" placeholder="Email" />
+<input id="password" type="password" placeholder="Mật khẩu" />
+<button onclick="login()">Đăng nhập</button>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
