@@ -1,16 +1,18 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>Đăng nhập</title>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-  <script src="script.js" defer></script>
+  <title>Login</title>
 </head>
 <body>
-  <h1>Đăng nhập</h1>
+  <h2>Đăng nhập</h2>
 
-  <input id="email" placeholder="Nhập email" />
+  <input id="email" placeholder="Nhập email hoặc tên">
   <button onclick="login()">Đăng nhập</button>
+
+  <!-- Firebase v8 -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
