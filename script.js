@@ -1,65 +1,60 @@
-// 🔥 Firebase config
-const firebaseConfig = {
-  apiKey: "AIzaSyB-ldnW85PPEL3Y4SAbWEotRvmTLtzgq8o",
-  authDomain: "task-75413.firebaseapp.com",
-  projectId: "task-75413",
-  storageBucket: "task-75413.firebasestorage.app",
-  messagingSenderId: "934934617374",
-  appId: "1:934934617374:web:71ed6700a713351a72fd0f"
-};
+let data = JSON.parse(localStorage.getItem("tasks")) || {};
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const days = ["2", "3", "4", "5", "6", "7"];
 
-const days = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
+function renderTable() {
+  const tbody = document.getElementById("tableBody");
+  tbody.innerHTML = "";
 
-// ================= THÊM NHIỆM VỤ =================
+  Object.keys(data).forEach(name => {
+    const tr = document.createElement("tr");
+
+    // cột tên
+    const nameTd = document.createElement("td");
+    nameTd.textContent = name;
+    tr.appendChild(nameTd);
+
+    // các ngày
+    days.forEach(d => {
+      const td = document.createElement("td");
+      (data[name][d] || []).forEach(t => {
+        const div = document.createElement("div");
+        div.className = "task";
+        div.textContent = t;
+        td.appendChild(div);
+      });
+      tr.appendChild(td);
+    });
+
+    // ghi chú
+    const noteTd = document.createElement("td");
+    noteTd.textContent = "Đang làm";
+    tr.appendChild(noteTd);
+
+    tbody.appendChild(tr);
+  });
+}
+
 function addTask() {
-  const employee = document.getElementById("employee").value.trim();
+  const name = document.getElementById("name").value.trim();
   const day = document.getElementById("day").value;
   const task = document.getElementById("task").value.trim();
 
-  if (!employee || !task) {
+  if (!name || !task) {
     alert("Nhập đủ tên và nhiệm vụ");
     return;
   }
 
-  db.collection("tasks").add({
-    employee,
-    day,
-    task
-  });
+  if (!data[name]) data[name] = {};
+  if (!data[name][day]) data[name][day] = [];
+
+  data[name][day].push(task);
+
+  localStorage.setItem("tasks", JSON.stringify(data));
 
   document.getElementById("task").value = "";
+  renderTable();
 }
 
-// ================= HIỂN THỊ BẢNG =================
-db.collection("tasks").onSnapshot(snapshot => {
-  const data = {};
-
-  snapshot.forEach(doc => {
-    const d = doc.data();
-    if (!data[d.employee]) {
-      data[d.employee] = {};
-    }
-    data[d.employee][d.day] = d.task;
-  });
-
-  renderTable(data);
-});
-
-function renderTable(data) {
-  const body = document.getElementById("tableBody");
-  body.innerHTML = "";
-
-  Object.keys(data).forEach(name => {
-    let row = `<tr><td><b>${name}</b></td>`;
-
-    days.forEach(day => {
-      row += `<td>${data[name][day] || ""}</td>`;
-    });
-
-    row += "</tr>";
-    body.innerHTML += row;
-  });
-}
+// hiển thị bảng ngay khi mở trang
+renderTable();
