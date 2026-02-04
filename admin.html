@@ -5,30 +5,36 @@
   <title>Admin</title>
 </head>
 <body>
-  <h2>Thêm nhiệm vụ</h2>
 
-  <!-- ❗ KHÔNG DÙNG FORM để tránh reload -->
-  <input id="employee" placeholder="Tên nhân viên">
-  <input id="day" placeholder="Ngày">
-  <input id="task" placeholder="Nhiệm vụ">
+<h1>Thêm nhiệm vụ</h1>
 
-  <button id="addBtn">➕ Thêm nhiệm vụ</button>
+<input id="employee" placeholder="Tên nhân viên">
+<select id="day">
+  <option>Thứ 2</option>
+  <option>Thứ 3</option>
+  <option>Thứ 4</option>
+  <option>Thứ 5</option>
+  <option>Thứ 6</option>
+  <option>Thứ 7</option>
+</select>
+<input id="task" placeholder="Nhiệm vụ">
+<button onclick="addTask()">Thêm nhiệm vụ</button>
 
-  <h3>Danh sách nhiệm vụ</h3>
-  <table border="1">
-    <thead>
-      <tr>
-        <th>Nhân viên</th>
-        <th>Ngày</th>
-        <th>Nhiệm vụ</th>
-        <th>Trạng thái</th>
-      </tr>
-    </thead>
-    <tbody id="taskTable"></tbody>
-  </table>
+<h2>Danh sách nhiệm vụ</h2>
+<table border="1">
+  <thead>
+    <tr>
+      <th>Nhân viên</th>
+      <th>Ngày</th>
+      <th>Nhiệm vụ</th>
+      <th>Trạng thái</th>
+    </tr>
+  </thead>
+  <tbody id="taskTable"></tbody>
+</table>
 
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-  <script src="script.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
