@@ -1,13 +1,26 @@
-const user = JSON.parse(localStorage.getItem("user"));
+const USERS = {
+  admin: { password: "123", role: "admin", name: "Admin" },
+  emp1: { password: "123", role: "employee", name: "Thiên" },
+  emp2: { password: "123", role: "employee", name: "Nhân viên 2" }
+};
 
-if (!user) {
-  alert("Bạn chưa đăng nhập");
-  window.location.href = "index.html";
+function login() {
+  const u = username.value;
+  const p = password.value;
+
+  if (!USERS[u] || USERS[u].password !== p) {
+    alert("Tài khoản không tồn tại");
+    return;
+  }
+
+  localStorage.setItem("user", JSON.stringify(USERS[u]));
+
+  location.href = USERS[u].role === "admin"
+    ? "admin.html"
+    : "employee.html";
 }
 
-const page = document.body.dataset.role;
-
-if (page && user.role !== page) {
-  alert("Không có quyền truy cập");
-  window.location.href = "index.html";
+function logout() {
+  localStorage.clear();
+  location.href = "index.html";
 }
