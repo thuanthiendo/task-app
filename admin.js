@@ -1,42 +1,42 @@
 import { db } from "./firebase.js";
 import {
-  collection,
-  doc,
-  setDoc
+  collection, addDoc, onSnapshot, deleteDoc, doc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-window.saveAll = async function () {
-  const rows = document.querySelectorAll("#taskTable tbody tr");
+const tasksRef = collection(db, "tasks");
 
-  for (let row of rows) {
-    const empId = row.dataset.id;
-    const cells = row.querySelectorAll("input");
+window.addTask = async () => {
+  const name = taskName.value;
+  const user = assignee.value;
 
-    const data = {
-      employeeId: empId,
-      employeeName: row.children[0].innerText,
-      week: getWeek(),
-      tasks: {
-        mon: cells[0].value,
-        tue: cells[1].value,
-        wed: cells[2].value,
-        thu: cells[3].value,
-        fri: cells[4].value,
-        sat: cells[5].value,
-        sun: cells[6].value
-      },
-      note: cells[7].value
-    };
-
-    await setDoc(doc(db, "weekly_tasks", empId + "_" + data.week), data);
-  }
-
-  alert("Đã lưu phân công tuần");
+  await addDoc(tasksRef, {
+    name,
+    user,
+    days: Array(7).fill(false),
+    note: ""
+  });
 };
 
-function getWeek() {
-  const d = new Date();
-  const onejan = new Date(d.getFullYear(),0,1);
-  const week = Math.ceil((((d - onejan) / 86400000) + onejan.getDay()+1)/7);
-  return `${d.getFullYear()}-W${week}`;
-}
+onSnapshot(tasksRef, snap => {
+  const tb = document.querySelector("tbody");
+  tb.innerHTML = "";
+
+  snap.forEach(d => {
+    const t = d.data();
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${t.user}</td>
+      ${t.days.map(v => `<td>${v ? "✔️" : ""}</td>`).join("")}
+      <td>${t.note}</td>
+      <td><button onclick="del('${d.id}')">❌</button></td>
+    `;
+    tb.appendChild(tr);
+  });
+});
+
+window.del = async id => {
+  if (confirm("Xóa công việc?")) {
+    await deleteDoc(doc(db, "tasks", id));
+  }
+};
