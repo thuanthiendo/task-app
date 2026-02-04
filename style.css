@@ -3,33 +3,23 @@ body {
   padding: 20px;
 }
 
-.form {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-input, select, button {
+.form input, .form select, .form button {
   padding: 6px;
+  margin-right: 6px;
 }
 
 table {
-  width: 100%;
   border-collapse: collapse;
+  margin-top: 15px;
+  width: 100%;
 }
 
 th, td {
-  border: 1px solid #999;
+  border: 1px solid #333;
   padding: 8px;
   text-align: center;
-  min-height: 40px;
 }
 
 th {
   background: #f0f0f0;
-}
-
-.empty {
-  color: #bbb;
-  font-style: italic;
 }
