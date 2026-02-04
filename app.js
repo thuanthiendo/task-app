@@ -1,70 +1,27 @@
-alert("JS ĐÃ CHẠY");
+console.log("APP.JS ĐÃ CHẠY");
 
-// ================= FIREBASE =================
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import {
-  getFirestore, collection, addDoc,
-  onSnapshot, deleteDoc, doc, updateDoc
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+const btn = document.getElementById("addTaskBtn");
+const input = document.getElementById("taskInput");
+const table = document.getElementById("taskTable");
 
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-};
+btn.addEventListener("click", () => {
+  const task = input.value.trim();
+  if (!task) return alert("Chưa nhập nhiệm vụ");
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// ================= DOM =================
-const addBtn = document.getElementById("addTaskBtn");
-const taskName = document.getElementById("taskName");
-const taskDay = document.getElementById("taskDay");
-
-// 🔥 FIX LỖI: KIỂM TRA NÚT CÓ TỒN TẠI KHÔNG
-console.log("Button:", addBtn);
-
-// ================= ADD TASK =================
-addBtn.addEventListener("click", async () => {
-  if (!taskName.value) {
-    alert("Chưa nhập nhiệm vụ");
-    return;
+  // tìm ô trống đầu tiên
+  const cells = table.querySelectorAll("td");
+  for (let cell of cells) {
+    if (cell.innerHTML === "") {
+      cell.innerHTML = `
+        ${task}
+        <br>
+        <button onclick="this.parentElement.innerHTML=''">❌</button>
+        <button onclick="this.parentElement.style.opacity='0.4'">✔</button>
+      `;
+      input.value = "";
+      return;
+    }
   }
 
-  await addDoc(collection(db, "tasks"), {
-    name: taskName.value,
-    day: taskDay.value,
-    done: false
-  });
-
-  taskName.value = "";
-});
-
-// ================= LOAD REALTIME =================
-const cells = document.querySelectorAll("td[data-day]");
-
-onSnapshot(collection(db, "tasks"), (snapshot) => {
-  cells.forEach(c => c.innerHTML = "");
-
-  snapshot.forEach(docSnap => {
-    const task = docSnap.data();
-    const cell = document.querySelector(`td[data-day="${task.day}"]`);
-
-    const div = document.createElement("div");
-    div.className = "task" + (task.done ? " done" : "");
-    div.innerHTML = `
-      ${task.name}
-      <br>
-      <button class="doneBtn">✔</button>
-      <button class="delBtn">❌</button>
-    `;
-
-    div.querySelector(".doneBtn").onclick = () =>
-      updateDoc(doc(db, "tasks", docSnap.id), { done: !task.done });
-
-    div.querySelector(".delBtn").onclick = () =>
-      deleteDoc(doc(db, "tasks", docSnap.id));
-
-    cell.appendChild(div);
-  });
+  alert("Bảng đã đầy");
 });
