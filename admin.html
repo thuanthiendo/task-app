@@ -1,17 +1,15 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Admin</title>
-  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <h1>Bảng phân công công việc</h1>
 
-<h2>Thêm nhiệm vụ</h2>
-
-<input id="employee" placeholder="Tên nhân viên">
+<h3>Thêm nhiệm vụ</h3>
+<input id="employee" placeholder="Tên nhân viên" />
 <select id="day">
   <option>Thứ 2</option>
   <option>Thứ 3</option>
@@ -20,13 +18,11 @@
   <option>Thứ 6</option>
   <option>Thứ 7</option>
 </select>
-<input id="task" placeholder="Nhiệm vụ">
+<input id="task" placeholder="Nhiệm vụ" />
 
-<!-- 🔥 QUAN TRỌNG: type="button" -->
-<button type="button" onclick="addTask()">➕ Thêm nhiệm vụ</button>
+<button onclick="addTask()">➕ Thêm nhiệm vụ</button>
 
-<h2>Danh sách nhiệm vụ</h2>
-
+<h3>Danh sách nhiệm vụ</h3>
 <table border="1" width="100%">
   <thead>
     <tr>
@@ -34,13 +30,15 @@
       <th>Ngày</th>
       <th>Nhiệm vụ</th>
       <th>Trạng thái</th>
+      <th>Xoá</th>
     </tr>
   </thead>
   <tbody id="taskTable"></tbody>
 </table>
 
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="script.js"></script>
+
 </body>
 </html>
