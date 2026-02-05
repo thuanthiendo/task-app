@@ -7,49 +7,54 @@
 </head>
 <body>
 
+<!-- LOGIN -->
 <div id="loginBox">
-  <h3>Đăng nhập</h3>
-  <input id="username" placeholder="Tài khoản">
+  <h2>Đăng nhập</h2>
+  <input id="username" placeholder="Tên đăng nhập">
   <input id="password" type="password" placeholder="Mật khẩu">
-  <button onclick="login()">Đăng nhập</button>
+  <button type="button" onclick="login()">Đăng nhập</button>
 </div>
 
+<!-- APP -->
 <div id="app" style="display:none">
-
   <h2>BẢNG NHIỆM VỤ (7 NGÀY)</h2>
 
   <div class="add-box admin-only">
     <input id="nameInput" placeholder="Tên nhân viên" />
-    <select id="dayInput"></select>
+    <select id="dayInput">
+      <option>Thứ 2</option>
+      <option>Thứ 3</option>
+      <option>Thứ 4</option>
+      <option>Thứ 5</option>
+      <option>Thứ 6</option>
+      <option>Thứ 7</option>
+      <option>CN</option>
+    </select>
     <input id="taskInput" placeholder="Nhiệm vụ" />
-    <button onclick="addTask()">➕ Thêm</button>
+    <button type="button" onclick="addTask()">➕ Thêm</button>
   </div>
 
   <table>
     <thead>
       <tr>
         <th>Tên</th>
-        <th id="d2">Thứ 2</th>
-        <th id="d3">Thứ 3</th>
-        <th id="d4">Thứ 4</th>
-        <th id="d5">Thứ 5</th>
-        <th id="d6">Thứ 6</th>
-        <th id="d7">Thứ 7</th>
-        <th id="cn">CN</th>
-        <th>Ghi chú</th>
+        <th>T2</th><th>T3</th><th>T4</th>
+        <th>T5</th><th>T6</th><th>T7</th><th>CN</th>
       </tr>
     </thead>
     <tbody id="tableBody"></tbody>
   </table>
 
   <br>
-  <button onclick="logout()">Đăng xuất</button>
+  <button type="button" onclick="logout()">Đăng xuất</button>
 </div>
 
-<!-- Firebase -->
+<!-- Firebase (PHẢI load TRƯỚC app.js) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-<script src="app.js"></script>
+<!-- App -->
+<script src="app.js" defer></script>
+
 </body>
 </html>
