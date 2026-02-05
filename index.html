@@ -21,19 +21,24 @@
   <h2>BẢNG PHÂN CÔNG CÔNG VIỆC (7 NGÀY)</h2>
 
   <!-- ADMIN -->
-  <div class="admin-only add-box">
+  <div class="admin-only">
     <input id="nameInput" placeholder="Tên nhân viên">
     <select id="dayInput">
-      <option>Thứ 2</option><option>Thứ 3</option><option>Thứ 4</option>
-      <option>Thứ 5</option><option>Thứ 6</option><option>Thứ 7</option><option>CN</option>
+      <option>Thứ 2</option>
+      <option>Thứ 3</option>
+      <option>Thứ 4</option>
+      <option>Thứ 5</option>
+      <option>Thứ 6</option>
+      <option>Thứ 7</option>
+      <option>CN</option>
     </select>
     <input id="taskInput" placeholder="Nhiệm vụ">
     <button onclick="addTask()">➕ Thêm</button>
-    <button class="danger" onclick="clearHistory()">🗑 Xóa toàn bộ lịch sử</button>
+    <button onclick="clearHistory()" style="color:red">🗑 Xóa toàn bộ lịch sử</button>
   </div>
 
-  <!-- TABLE -->
-  <table>
+  <!-- TASK TABLE -->
+  <table border="1" width="100%">
     <thead>
       <tr>
         <th>Tên</th>
@@ -45,7 +50,7 @@
   </table>
 
   <h3>📜 LỊCH SỬ HOÀN THÀNH</h3>
-  <table>
+  <table border="1" width="100%">
     <thead>
       <tr>
         <th>Thời gian</th>
@@ -58,11 +63,14 @@
     <tbody id="historyBody"></tbody>
   </table>
 
-  <button class="logout" onclick="logout()">Đăng xuất</button>
+  <br>
+  <button onclick="logout()">Đăng xuất</button>
 </div>
 
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
 <script src="app.js"></script>
 </body>
 </html>
