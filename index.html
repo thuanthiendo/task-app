@@ -20,8 +20,8 @@
 
   <h2>BẢNG NHIỆM VỤ (7 NGÀY)</h2>
 
-  <!-- ADMIN ADD TASK -->
-  <div class="add-box admin-only">
+  <!-- ADMIN -->
+  <div class="admin-only">
     <input id="nameInput" placeholder="Tên nhân viên">
     <select id="dayInput">
       <option>Thứ 2</option>
@@ -33,7 +33,10 @@
       <option>CN</option>
     </select>
     <input id="taskInput" placeholder="Nhiệm vụ">
-    <button type="button" onclick="addTask()">➕ Thêm</button>
+    <button onclick="addTask()">➕ Thêm</button>
+    <button onclick="clearHistory()" style="margin-left:10px;color:red">
+      🗑️ Xóa toàn bộ lịch sử
+    </button>
   </div>
 
   <!-- TABLE -->
@@ -54,20 +57,20 @@
     <thead>
       <tr>
         <th>Thời gian</th>
-        <th>Người thực hiện</th>
+        <th>Nhân viên</th>
         <th>Thứ</th>
         <th>Nhiệm vụ</th>
-        <th>✔</th>
+        <th>Trạng thái</th>
       </tr>
     </thead>
     <tbody id="historyBody"></tbody>
   </table>
 
   <br>
-  <button type="button" onclick="logout()">Đăng xuất</button>
+  <button onclick="logout()">Đăng xuất</button>
 </div>
 
-<!-- FIREBASE -->
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
