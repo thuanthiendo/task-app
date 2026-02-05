@@ -2,16 +2,48 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>Đăng nhập</title>
+  <title>Bảng nhiệm vụ 7 ngày</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h2>Đăng nhập</h2>
 
-  <input id="username" placeholder="Tên đăng nhập" />
-  <input id="password" type="password" placeholder="Mật khẩu" />
-  <button onclick="login()">Đăng nhập</button>
+<h2>BẢNG NHIỆM VỤ (7 NGÀY)</h2>
 
-  <script src="script.js"></script>
+<div class="add-box">
+  <input id="nameInput" placeholder="Tên nhân viên" />
+  <select id="dayInput">
+    <option>Thứ 2</option>
+    <option>Thứ 3</option>
+    <option>Thứ 4</option>
+    <option>Thứ 5</option>
+    <option>Thứ 6</option>
+    <option>Thứ 7</option>
+    <option>CN</option>
+  </select>
+  <input id="taskInput" placeholder="Nhiệm vụ" />
+  <button onclick="addTask()">➕ Thêm</button>
+</div>
+
+<table id="schedule">
+  <thead>
+    <tr>
+      <th>Nhân viên</th>
+      <th>Thứ 2</th>
+      <th>Thứ 3</th>
+      <th>Thứ 4</th>
+      <th>Thứ 5</th>
+      <th>Thứ 6</th>
+      <th>Thứ 7</th>
+      <th>CN</th>
+    </tr>
+  </thead>
+  <tbody id="tableBody"></tbody>
+</table>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script src="app.js"></script>
 </body>
 </html>
