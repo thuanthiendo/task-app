@@ -2,7 +2,7 @@
 const USERS = {
   admin: { password: "123", role: "admin" },
   emp1: { password: "123", role: "employee" },
-  emp2: { password: "123", role: "employee" }
+  thiendt: { password: "123", role: "employee" }
 };
 
 let currentUser = null;
