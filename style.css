@@ -22,35 +22,12 @@ body {
   font-size: 16px;
 }
 
-button {
-  cursor: pointer;
-}
-
 table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 15px;
   background: #fff;
-}
-
-th, td {
-  border: 1px solid #ddd;
-  padding: 8px;
-  vertical-align: top;
-}
-
-th {
-  background: #f0f0f0;
-}
-
-.add-task input, .add-task select {
-  padding: 8px;
-  margin-right: 5px;
-}  
-table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed; /* QUAN TRỌNG */
+  table-layout: fixed;
 }
 
 th, td {
@@ -60,30 +37,18 @@ th, td {
   word-wrap: break-word;
 }
 
-/* Cột tên */
-th:first-child,
-td:first-child {
+th {
+  background: #f0f0f0;
+}
+
+th:first-child, td:first-child {
   width: 140px;
   font-weight: bold;
 }
 
-/* Các cột thứ */
-th:not(:first-child),
-td:not(:first-child) {
-  width: calc((100% - 140px) / 7);
-}
-
-/* Task item */
 .task-item {
   display: flex;
   align-items: center;
   gap: 6px;
   margin-bottom: 4px;
-  white-space: normal;
 }
-
-.task-item input[type="checkbox"] {
-  flex-shrink: 0;
-}
-
-
