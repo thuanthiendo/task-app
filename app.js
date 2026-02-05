@@ -1,7 +1,9 @@
-/************* LOGIN CỨNG *************/
+/******** LOGIN ********/
 const USERS = {
   admin: { password: "123", role: "admin" },
-  emp1: { password: "123", role: "employee" },
+  hungtv: { password: "123", role: "admin" },
+  thiendt: { password: "123", role: "employee" },
+  khangpd: { password: "123", role: "employee" },
   emp2: { password: "123", role: "employee" }
 };
 
@@ -24,7 +26,7 @@ window.login = function () {
   applyRole();
 };
 
-window.logout = function () {
+window.logout = () => {
   localStorage.clear();
   location.reload();
 };
@@ -35,7 +37,7 @@ function applyRole() {
   }
 }
 
-/************* AUTO LOGIN *************/
+/******** AUTO LOGIN ********/
 const savedRole = localStorage.getItem("role");
 if (savedRole) {
   currentRole = savedRole;
@@ -44,19 +46,48 @@ if (savedRole) {
   applyRole();
 }
 
-/************* FIREBASE *************/
-const firebaseConfig = {
+/******** FIREBASE ********/
+firebase.initializeApp({
   apiKey: "AIzaSyB-ldnW85PPEL3Y4SAbWEotRvmTLtzgq8o",
   authDomain: "task-75413.firebaseapp.com",
   projectId: "task-75413",
-};
+});
 
-firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-const days = ["Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7","CN"];
+/******** DATE UTILS ********/
+function getWeekDays() {
+  const today = new Date();
+  const monday = new Date(today.setDate(today.getDate() - today.getDay() + 1));
 
-/************* TASK *************/
+  const days = [];
+  const names = ["Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7","CN"];
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    days.push({
+      key: names[i],
+      label: `${names[i]} (${d.getDate()}/${d.getMonth()+1})`
+    });
+  }
+  return days;
+}
+
+const weekDays = getWeekDays();
+
+/******** INIT HEADER + SELECT ********/
+const headerRow = document.getElementById("headerRow");
+const dayInput = document.getElementById("dayInput");
+
+weekDays.forEach(d => {
+  headerRow.innerHTML += `<th>${d.label}</th>`;
+  dayInput.innerHTML += `<option value="${d.key}">${d.label}</option>`;
+});
+
+headerRow.innerHTML += `<th>Ghi chú</th>`;
+
+/******** ADD TASK ********/
 window.addTask = function () {
   if (currentRole !== "admin") return;
 
@@ -70,55 +101,22 @@ window.addTask = function () {
   }
 
   db.collection("tasks").add({
-    name, day, text,
+    name,
+    day,
+    text,
     done: false,
+    note: "",
     createdAt: Date.now()
   });
 
   taskInput.value = "";
 };
 
+/******** RENDER ********/
 db.collection("tasks").onSnapshot(snapshot => {
   const data = {};
   snapshot.forEach(doc => {
     const d = doc.data();
-    if (!data[d.name]) data[d.name] = {};
-    if (!data[d.name][d.day]) data[d.name][d.day] = [];
-    data[d.name][d.day].push({ id: doc.id, ...d });
-  });
-  renderTable(data);
-});
-
-function renderTable(data) {
-  tableBody.innerHTML = "";
-
-  Object.keys(data).forEach(name => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td><b>${name}</b></td>`;
-
-    days.forEach(day => {
-      const td = document.createElement("td");
-      (data[name][day] || []).forEach(t => {
-        td.innerHTML += `
-          <div>
-            <input type="checkbox" ${t.done ? "checked" : ""}
-              onchange="toggleDone('${t.id}', this.checked)">
-            ${t.text}
-            ${currentRole === "admin" ? `<button onclick="deleteTask('${t.id}')">❌</button>` : ""}
-          </div>
-        `;
-      });
-      tr.appendChild(td);
-    });
-
-    tableBody.appendChild(tr);
-  });
-}
-
-window.toggleDone = (id, v) =>
-  db.collection("tasks").doc(id).update({ done: v });
-
-window.deleteTask = id => {
-  if (confirm("Xoá nhiệm vụ?"))
-    db.collection("tasks").doc(id).delete();
-};
+    if (!data[d.name]) data[d.name] = { tasks:{}, notes:{} };
+    if (!data[d.name].tasks[d.day]) data[d.name].tasks[d.day] = [];
+    data[d.name].tasks[d]()
