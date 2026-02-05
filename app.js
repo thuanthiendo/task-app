@@ -1,6 +1,6 @@
-/***********************
- * LOGIN CỨNG (NỘI BỘ)
- ***********************/
+console.log("APP JS LOADED");
+
+/* ================= LOGIN CỨNG ================= */
 const USERS = {
   admin: { password: "123", role: "admin" },
   emp1: { password: "123", role: "employee" },
@@ -10,6 +10,8 @@ const USERS = {
 let currentRole = null;
 
 window.login = function () {
+  console.log("LOGIN CLICKED");
+
   const u = document.getElementById("username").value.trim();
   const p = document.getElementById("password").value.trim();
 
@@ -24,7 +26,9 @@ window.login = function () {
   document.getElementById("loginBox").style.display = "none";
   document.getElementById("app").style.display = "block";
 
-  applyRole();
+  if (currentRole !== "admin") {
+    document.querySelectorAll(".admin-only").forEach(e => e.remove());
+  }
 };
 
 window.logout = function () {
@@ -32,26 +36,7 @@ window.logout = function () {
   location.reload();
 };
 
-function applyRole() {
-  if (currentRole !== "admin") {
-    document.querySelectorAll(".admin-only").forEach(e => e.remove());
-  }
-}
-
-/***********************
- * AUTO LOGIN
- ***********************/
-const savedRole = localStorage.getItem("role");
-if (savedRole) {
-  currentRole = savedRole;
-  document.getElementById("loginBox").style.display = "none";
-  document.getElementById("app").style.display = "block";
-  applyRole();
-}
-
-/***********************
- * FIREBASE INIT
- ***********************/
+/* ================= FIREBASE ================= */
 firebase.initializeApp({
   apiKey: "AIzaSyB-ldnW85PPEL3Y4SAbWEotRvmTLtzgq8o",
   authDomain: "task-75413.firebaseapp.com",
@@ -60,44 +45,49 @@ firebase.initializeApp({
 
 const db = firebase.firestore();
 
-/***********************
- * SET HEADER THỨ + NGÀY
- ***********************/
+/* ================= CONSTANTS ================= */
+const DAYS = ["Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7","CN"];
+
+/* ================= INIT ================= */
+document.addEventListener("DOMContentLoaded", () => {
+  const daySelect = document.getElementById("dayInput");
+  if (daySelect) {
+    DAYS.forEach(d => {
+      const o = document.createElement("option");
+      o.textContent = d;
+      daySelect.appendChild(o);
+    });
+  }
+
+  setWeekHeader();
+  listenTasks();
+});
+
+/* ================= HEADER ================= */
 function setWeekHeader() {
   const today = new Date();
   const monday = new Date(today);
   monday.setDate(today.getDate() - today.getDay() + 1);
 
   const map = [
-    { id: "d2", label: "Thứ 2" },
-    { id: "d3", label: "Thứ 3" },
-    { id: "d4", label: "Thứ 4" },
-    { id: "d5", label: "Thứ 5" },
-    { id: "d6", label: "Thứ 6" },
-    { id: "d7", label: "Thứ 7" },
-    { id: "cn", label: "CN" },
+    ["d2","Thứ 2"],
+    ["d3","Thứ 3"],
+    ["d4","Thứ 4"],
+    ["d5","Thứ 5"],
+    ["d6","Thứ 6"],
+    ["d7","Thứ 7"],
+    ["cn","CN"],
   ];
 
-  map.forEach((m, i) => {
+  map.forEach((m,i) => {
     const d = new Date(monday);
     d.setDate(monday.getDate() + i);
-    const th = document.getElementById(m.id);
-    if (th) {
-      th.innerText = `${m.label} (${d.getDate()}/${d.getMonth() + 1})`;
-    }
+    const el = document.getElementById(m[0]);
+    if (el) el.innerText = `${m[1]} (${d.getDate()}/${d.getMonth()+1})`;
   });
 }
 
-setWeekHeader();
-
-/***********************
- * CONSTANTS
- ***********************/
-const DAYS = ["Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7","CN"];
-
-/***********************
- * ADD TASK (ADMIN)
- ***********************/
+/* ================= ADD TASK ================= */
 window.addTask = function () {
   if (currentRole !== "admin") return;
 
@@ -122,50 +112,45 @@ window.addTask = function () {
   document.getElementById("taskInput").value = "";
 };
 
-/***********************
- * REALTIME LISTENER
- ***********************/
-db.collection("tasks").onSnapshot(snapshot => {
-  const data = {};
+/* ================= LISTENER ================= */
+function listenTasks() {
+  db.collection("tasks").onSnapshot(snapshot => {
+    const data = {};
 
-  snapshot.forEach(doc => {
-    const d = doc.data();
-    if (!data[d.name]) data[d.name] = {};
-    if (!data[d.name][d.day]) data[d.name][d.day] = [];
-    data[d.name][d.day].push({ id: doc.id, ...d });
+    snapshot.forEach(doc => {
+      const d = doc.data();
+      if (!data[d.name]) data[d.name] = {};
+      if (!data[d.name][d.day]) data[d.name][d.day] = [];
+      data[d.name][d.day].push({ id: doc.id, ...d });
+    });
+
+    renderTable(data);
   });
+}
 
-  renderTable(data);
-});
-
-/***********************
- * RENDER TABLE
- ***********************/
+/* ================= RENDER ================= */
 function renderTable(data) {
   const body = document.getElementById("tableBody");
+  if (!body) return;
+
   body.innerHTML = "";
 
   Object.keys(data).forEach(name => {
     const tr = document.createElement("tr");
 
-    // TÊN
-    const nameTd = document.createElement("td");
-    nameTd.innerHTML = `<b>${name}</b>`;
-    tr.appendChild(nameTd);
+    const tdName = document.createElement("td");
+    tdName.innerHTML = `<b>${name}</b>`;
+    tr.appendChild(tdName);
 
-    // NGÀY
     DAYS.forEach(day => {
       const td = document.createElement("td");
 
       (data[name][day] || []).forEach(t => {
         const div = document.createElement("div");
         div.innerHTML = `
-          <input type="checkbox" ${t.done ? "checked" : ""}
-            onchange="toggleDone('${t.id}', this.checked)">
-          <span style="${t.done ? "text-decoration:line-through" : ""}">
-            ${t.text}
-          </span>
-          ${currentRole === "admin" ? `<button onclick="deleteTask('${t.id}')">❌</button>` : ""}
+          <input type="checkbox" ${t.done ? "checked" : ""} onchange="toggleDone('${t.id}', this.checked)">
+          <span style="${t.done ? "text-decoration:line-through" : ""}">${t.text}</span>
+          <button onclick="deleteTask('${t.id}')">❌</button>
         `;
         td.appendChild(div);
       });
@@ -173,8 +158,21 @@ function renderTable(data) {
       tr.appendChild(td);
     });
 
-    // GHI CHÚ
     const noteTd = document.createElement("td");
-    noteTd.innerHTML = `
-      <textarea rows="3" style="width:100%"
-        placeholder="
+    noteTd.textContent = "";
+    tr.appendChild(noteTd);
+
+    body.appendChild(tr);
+  });
+}
+
+/* ================= ACTIONS ================= */
+window.toggleDone = function (id, val) {
+  db.collection("tasks").doc(id).update({ done: val });
+};
+
+window.deleteTask = function (id) {
+  if (confirm("Xoá nhiệm vụ?")) {
+    db.collection("tasks").doc(id).delete();
+  }
+};
