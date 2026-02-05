@@ -1,29 +1,28 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Bảng nhiệm vụ 7 ngày</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- ================= LOGIN ================= -->
+<!-- LOGIN -->
 <div id="loginBox">
   <h2>Đăng nhập</h2>
-  <input id="username" placeholder="Tên đăng nhập">
+  <input id="username" placeholder="Tài khoản">
   <input id="password" type="password" placeholder="Mật khẩu">
   <button type="button" onclick="login()">Đăng nhập</button>
 </div>
 
-<!-- ================= APP ================= -->
+<!-- APP -->
 <div id="app" style="display:none">
 
   <h2>BẢNG NHIỆM VỤ (7 NGÀY)</h2>
 
-  <!-- ADD TASK (ADMIN ONLY) -->
+  <!-- ADMIN ADD TASK -->
   <div class="add-box admin-only">
-    <input id="nameInput" placeholder="Tên nhân viên" />
-
+    <input id="nameInput" placeholder="Tên nhân viên">
     <select id="dayInput">
       <option>Thứ 2</option>
       <option>Thứ 3</option>
@@ -33,58 +32,45 @@
       <option>Thứ 7</option>
       <option>CN</option>
     </select>
-
-    <input id="taskInput" placeholder="Nhiệm vụ" />
+    <input id="taskInput" placeholder="Nhiệm vụ">
     <button type="button" onclick="addTask()">➕ Thêm</button>
   </div>
 
-  <!-- TASK TABLE -->
-  <table border="1" cellpadding="6" cellspacing="0">
+  <!-- TABLE -->
+  <table border="1" cellpadding="6" cellspacing="0" width="100%">
     <thead>
       <tr>
         <th>Tên</th>
-        <th>T2</th>
-        <th>T3</th>
-        <th>T4</th>
-        <th>T5</th>
-        <th>T6</th>
-        <th>T7</th>
-        <th>CN</th>
+        <th>T2</th><th>T3</th><th>T4</th>
+        <th>T5</th><th>T6</th><th>T7</th><th>CN</th>
+        <th>Xóa</th>
       </tr>
     </thead>
     <tbody id="tableBody"></tbody>
   </table>
 
-  <br><br>
-
-  <!-- ================= LOG TABLE ================= -->
-  <h3>📌 LỊCH SỬ HOÀN THÀNH CÔNG VIỆC</h3>
-
-  <table border="1" cellpadding="6" cellspacing="0">
+  <h3>📌 LỊCH SỬ HOÀN THÀNH</h3>
+  <table border="1" cellpadding="6" cellspacing="0" width="100%">
     <thead>
       <tr>
         <th>Thời gian</th>
         <th>Người thực hiện</th>
         <th>Thứ</th>
         <th>Nhiệm vụ</th>
-        <th>Trạng thái</th>
+        <th>✔</th>
       </tr>
     </thead>
-    <tbody id="logBody"></tbody>
+    <tbody id="historyBody"></tbody>
   </table>
 
   <br>
-
   <button type="button" onclick="logout()">Đăng xuất</button>
-
 </div>
 
-<!-- ================= FIREBASE ================= -->
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-<!-- ================= APP JS ================= -->
-<script src="app.js" defer></script>
-
+<script src="app.js"></script>
 </body>
 </html>
