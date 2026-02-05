@@ -1,166 +1,68 @@
-* {
-  box-sizing: border-box;
-  font-family: "Segoe UI", Tahoma, sans-serif;
-}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Bảng phân công công việc</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-body {
-  background: #f4f6f8;
-  padding: 20px;
-  color: #333;
-}
+<!-- LOGIN -->
+<div id="loginBox">
+  <h2>Đăng nhập</h2>
+  <input id="username" placeholder="Tài khoản">
+  <input id="password" type="password" placeholder="Mật khẩu">
+  <button onclick="login()">Đăng nhập</button>
+</div>
 
-/* ===== LOGIN ===== */
-#loginBox {
-  max-width: 360px;
-  margin: 120px auto;
-  background: #fff;
-  padding: 25px;
-  border-radius: 10px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-}
+<!-- APP -->
+<div id="app" style="display:none">
 
-#loginBox h2 {
-  text-align: center;
-  margin-bottom: 20px;
-}
+  <h2>BẢNG PHÂN CÔNG CÔNG VIỆC (7 NGÀY)</h2>
 
-#loginBox input {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 12px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
+  <!-- ADMIN -->
+  <div class="admin-only add-box">
+    <input id="nameInput" placeholder="Tên nhân viên">
+    <select id="dayInput">
+      <option>Thứ 2</option><option>Thứ 3</option><option>Thứ 4</option>
+      <option>Thứ 5</option><option>Thứ 6</option><option>Thứ 7</option><option>CN</option>
+    </select>
+    <input id="taskInput" placeholder="Nhiệm vụ">
+    <button onclick="addTask()">➕ Thêm</button>
+    <button class="danger" onclick="clearHistory()">🗑 Xóa toàn bộ lịch sử</button>
+  </div>
 
-#loginBox button {
-  width: 100%;
-  padding: 10px;
-  background: #4f46e5;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
+  <!-- TABLE -->
+  <table>
+    <thead>
+      <tr>
+        <th>Tên</th>
+        <th>T2</th><th>T3</th><th>T4</th>
+        <th>T5</th><th>T6</th><th>T7</th><th>CN</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
 
-#loginBox button:hover {
-  background: #4338ca;
-}
+  <h3>📜 LỊCH SỬ HOÀN THÀNH</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Thời gian</th>
+        <th>Nhân viên</th>
+        <th>Thứ</th>
+        <th>Nhiệm vụ</th>
+        <th>Xóa</th>
+      </tr>
+    </thead>
+    <tbody id="historyBody"></tbody>
+  </table>
 
-/* ===== APP ===== */
-#app {
-  background: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-}
+  <button class="logout" onclick="logout()">Đăng xuất</button>
+</div>
 
-h2 {
-  margin-bottom: 15px;
-}
-
-/* ===== ADD TASK ===== */
-.admin-only {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
-  flex-wrap: wrap;
-}
-
-.admin-only input,
-.admin-only select {
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
-.admin-only button {
-  background: #16a34a;
-  color: white;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.admin-only button:hover {
-  background: #15803d;
-}
-
-/* ===== TABLE ===== */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-}
-
-th, td {
-  border: 1px solid #ddd;
-  padding: 10px;
-  text-align: center;
-}
-
-th {
-  background: #f1f5f9;
-}
-
-td:first-child {
-  font-weight: bold;
-  background: #f8fafc;
-}
-
-/* ===== TASK CELL ===== */
-.task {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-}
-
-.task.done {
-  text-decoration: line-through;
-  color: #16a34a;
-}
-
-/* ===== HISTORY ===== */
-#historyBox {
-  margin-top: 30px;
-}
-
-#historyBox h3 {
-  margin-bottom: 10px;
-}
-
-#historyBox table {
-  font-size: 14px;
-}
-
-/* ===== BUTTONS ===== */
-button {
-  cursor: pointer;
-}
-
-.logout-btn {
-  margin-top: 15px;
-  background: #dc2626;
-  color: white;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 6px;
-}
-
-.logout-btn:hover {
-  background: #b91c1c;
-}
-
-.clear-btn {
-  background: #f97316;
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
-  margin-bottom: 8px;
-}
-
-.clear-btn:hover {
-  background: #ea580c;
-}
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
