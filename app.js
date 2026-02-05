@@ -110,7 +110,7 @@ function loadTasks() {
 
       snap.forEach(doc => {
         const d = doc.data();
-        if (!d.name) return;
+        if (!d.name || !d.day || !d.text) return;
 
         if (!data[d.name]) data[d.name] = {};
         if (!data[d.name][d.day]) data[d.name][d.day] = [];
@@ -133,35 +133,29 @@ function renderTable(data) {
       const td = document.createElement("td");
 
       (data[name][day] || []).forEach(t => {
-        const div = document.createElement("div");
-        div.style.display = "flex";
-        div.style.alignItems = "center";
-        div.style.gap = "6px";
+        const item = document.createElement("div");
+        item.className = "task-item";
 
         const cb = document.createElement("input");
         cb.type = "checkbox";
         cb.checked = t.done;
 
         cb.onchange = () => {
-          db.collection("tasks").doc(t.id).update({ done: cb.checked });
+          db.collection("tasks").doc(t.id).update({
+            done: cb.checked
+          });
 
           if (cb.checked) {
-            db.collection("history").add({
-              name,
-              text: t.text,
-              time: new Date().toLocaleString()
-            });
-
-            db.collection("tasks").doc(t.id).delete();
+            addHistory(name, t.text);
           }
         };
 
         const span = document.createElement("span");
         span.textContent = t.text;
 
-        div.appendChild(cb);
-        div.appendChild(span);
-        td.appendChild(div);
+        item.appendChild(cb);
+        item.appendChild(span);
+        td.appendChild(item);
       });
 
       tr.appendChild(td);
@@ -172,6 +166,16 @@ function renderTable(data) {
 }
 
 /**************** HISTORY ****************/
+function addHistory(name, text) {
+  if (!name || !text) return;
+
+  db.collection("history").add({
+    name,
+    text,
+    time: firebase.firestore.FieldValue.serverTimestamp()
+  });
+}
+
 function loadHistory() {
   db.collection("history")
     .orderBy("time", "desc")
@@ -180,17 +184,16 @@ function loadHistory() {
 
       snap.forEach(doc => {
         const d = doc.data();
-        const tr = document.createElement("tr");
+        if (!d.name || !d.text || !d.time) return;
 
+        const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${d.name}</td>
           <td>${d.text}</td>
-          <td>${d.time}</td>
-          ${
-            currentRole === "admin"
-              ? `<td><button onclick="deleteHistory('${doc.id}')">❌</button></td>`
-              : ""
-          }
+          <td>${d.time.toDate().toLocaleString()}</td>
+          <td>
+            <button onclick="deleteHistory('${doc.id}')">❌</button>
+          </td>
         `;
 
         historyBody.appendChild(tr);
@@ -199,6 +202,5 @@ function loadHistory() {
 }
 
 window.deleteHistory = function (id) {
-  if (currentRole !== "admin") return;
   db.collection("history").doc(id).delete();
 };
