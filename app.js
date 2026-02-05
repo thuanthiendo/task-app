@@ -95,16 +95,17 @@ window.addTask = function () {
 function loadTasks() {
   db.collection("tasks").onSnapshot(snap => {
     const data = {};
-    snapshot.forEach(doc => {
-  const d = doc.data();
 
-  // ❌ bỏ task không có tên nhân viên
-  if (!d.name || d.name.trim() === "") return;
+    snap.forEach(doc => {
+      const d = doc.data();
 
-  if (!data[d.name]) data[d.name] = {};
-  if (!data[d.name][d.day]) data[d.name][d.day] = [];
-  data[d.name][d.day].push({ id: doc.id, ...d });
-});
+      // bỏ task không có tên
+      if (!d.name || d.name.trim() === "") return;
+
+      if (!data[d.name]) data[d.name] = {};
+      if (!data[d.name][d.day]) data[d.name][d.day] = [];
+      data[d.name][d.day].push({ id: doc.id, ...d });
+    });
 
     renderTable(data);
   });
