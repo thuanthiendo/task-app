@@ -27,7 +27,7 @@ firebase.initializeApp({
 const db = firebase.firestore();
 const days = ["Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7","CN"];
 
-/**************** INIT APP ****************/
+/**************** INIT ****************/
 function initApp(user, role) {
   currentUser = user;
   currentRole = role;
@@ -52,7 +52,6 @@ window.login = function () {
 
   localStorage.setItem("user", u);
   localStorage.setItem("role", USERS[u].role);
-
   initApp(u, USERS[u].role);
 };
 
@@ -61,22 +60,19 @@ window.logout = function () {
   location.reload();
 };
 
+/**************** AUTO LOGIN (FIX F5) ****************/
+window.addEventListener("DOMContentLoaded", () => {
+  const u = localStorage.getItem("user");
+  const r = localStorage.getItem("role");
+  if (u && r) initApp(u, r);
+});
+
 /**************** ROLE ****************/
 function applyRole() {
   if (currentRole !== "admin") {
     document.querySelectorAll(".admin-only").forEach(e => e.remove());
   }
 }
-
-/**************** AUTO LOGIN (FIX F5) ****************/
-window.addEventListener("DOMContentLoaded", () => {
-  const savedUser = localStorage.getItem("user");
-  const savedRole = localStorage.getItem("role");
-
-  if (savedUser && savedRole) {
-    initApp(savedUser, savedRole);
-  }
-});
 
 /**************** TASK ****************/
 window.addTask = function () {
@@ -103,8 +99,7 @@ window.addTask = function () {
 };
 
 function loadTasks() {
-  db.collection("tasks")
-    .orderBy("createdAt")
+  db.collection("tasks").orderBy("createdAt")
     .onSnapshot(snap => {
       const data = {};
 
@@ -133,17 +128,15 @@ function renderTable(data) {
       const td = document.createElement("td");
 
       (data[name][day] || []).forEach(t => {
-        const item = document.createElement("div");
-        item.className = "task-item";
+        const div = document.createElement("div");
+        div.className = "task-item";
 
         const cb = document.createElement("input");
         cb.type = "checkbox";
         cb.checked = t.done;
 
         cb.onchange = () => {
-          db.collection("tasks").doc(t.id).update({
-            done: cb.checked
-          });
+          db.collection("tasks").doc(t.id).update({ done: cb.checked });
 
           if (cb.checked) {
             addHistory(name, t.text);
@@ -153,9 +146,9 @@ function renderTable(data) {
         const span = document.createElement("span");
         span.textContent = t.text;
 
-        item.appendChild(cb);
-        item.appendChild(span);
-        td.appendChild(item);
+        div.appendChild(cb);
+        div.appendChild(span);
+        td.appendChild(div);
       });
 
       tr.appendChild(td);
@@ -166,12 +159,11 @@ function renderTable(data) {
 }
 
 /**************** HISTORY ****************/
-function addHistory(name, text) {
-  if (!name || !text) return;
-
+function addHistory(taskOwner, taskText) {
   db.collection("history").add({
-    name,
-    text,
+    taskOwner,               // người được giao
+    taskText,
+    checkedBy: currentUser,  // người tick
     time: firebase.firestore.FieldValue.serverTimestamp()
   });
 }
@@ -184,23 +176,35 @@ function loadHistory() {
 
       snap.forEach(doc => {
         const d = doc.data();
-        if (!d.name || !d.text || !d.time) return;
+        if (!d.taskText || !d.checkedBy || !d.time) return;
 
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td>${d.name}</td>
-          <td>${d.text}</td>
+          <td>${d.checkedBy}</td>
+          <td>${d.taskText}</td>
           <td>${d.time.toDate().toLocaleString()}</td>
-          <td>
+          <td class="admin-only">
             <button onclick="deleteHistory('${doc.id}')">❌</button>
           </td>
         `;
-
         historyBody.appendChild(tr);
       });
     });
 }
 
 window.deleteHistory = function (id) {
+  if (!confirm("Xóa lịch sử này?")) return;
   db.collection("history").doc(id).delete();
+};
+
+window.clearHistory = async function () {
+  if (currentRole !== "admin") return;
+  if (!confirm("XÓA TOÀN BỘ LỊCH SỬ?")) return;
+
+  const snap = await db.collection("history").get();
+  const batch = db.batch();
+  snap.forEach(d => batch.delete(d.ref));
+  await batch.commit();
+
+  alert("Đã xóa toàn bộ lịch sử");
 };
