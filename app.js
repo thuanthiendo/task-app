@@ -199,19 +199,26 @@ function loadHistory() {
         if (!d.employee || !d.task || !d.time) return;
 
         const tr = document.createElement("tr");
+
         tr.innerHTML = `
           <td>${d.employee}</td>
           <td>${d.task}</td>
           <td>${d.checkedBy}</td>
           <td>${d.time.toDate().toLocaleString()}</td>
-          <td class="admin-only">
-            <button onclick="deleteHistory('${doc.id}')">❌</button>
-          </td>
         `;
+
+        // 👉 CHỈ ADMIN MỚI CÓ CỘT XÓA
+        if (currentRole === "admin") {
+          const td = document.createElement("td");
+          td.innerHTML = `<button onclick="deleteHistory('${doc.id}')">❌</button>`;
+          tr.appendChild(td);
+        }
+
         historyBody.appendChild(tr);
       });
     });
 }
+
 
 window.deleteHistory = function (id) {
   if (currentRole !== "admin") return;
