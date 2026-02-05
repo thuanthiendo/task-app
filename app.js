@@ -1,4 +1,4 @@
-/************* LOGIN CỨNG *************/
+/**************** LOGIN NỘI BỘ ****************/
 const USERS = {
   admin: { password: "123", role: "admin" },
   emp1: { password: "123", role: "employee" },
@@ -6,8 +6,8 @@ const USERS = {
 };
 
 let currentRole = null;
+let currentUser = null;
 
-/************* LOGIN *************/
 window.login = function () {
   const u = document.getElementById("username").value.trim();
   const p = document.getElementById("password").value.trim();
@@ -18,8 +18,10 @@ window.login = function () {
   }
 
   currentRole = USERS[u].role;
+  currentUser = u;
+
   localStorage.setItem("role", currentRole);
-  localStorage.setItem("user", u);
+  localStorage.setItem("user", currentUser);
 
   document.getElementById("loginBox").style.display = "none";
   document.getElementById("app").style.display = "block";
@@ -38,28 +40,28 @@ function applyRole() {
   }
 }
 
-/************* AUTO LOGIN *************/
-const savedRole = localStorage.getItem("role");
-if (savedRole) {
-  currentRole = savedRole;
+/*************** AUTO LOGIN ***************/
+if (localStorage.getItem("role")) {
+  currentRole = localStorage.getItem("role");
+  currentUser = localStorage.getItem("user");
+
   document.getElementById("loginBox").style.display = "none";
   document.getElementById("app").style.display = "block";
+
   applyRole();
 }
 
-/************* FIREBASE *************/
-const firebaseConfig = {
+/**************** FIREBASE ****************/
+firebase.initializeApp({
   apiKey: "AIzaSyB-ldnW85PPEL3Y4SAbWEotRvmTLtzgq8o",
   authDomain: "task-75413.firebaseapp.com",
   projectId: "task-75413",
-};
+});
 
-firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const DAYS = ["Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7","CN"];
 
-const days = ["Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7","CN"];
-
-/************* ADD TASK *************/
+/**************** ADD TASK (ADMIN) ****************/
 window.addTask = function () {
   if (currentRole !== "admin") return;
 
@@ -68,7 +70,7 @@ window.addTask = function () {
   const text = document.getElementById("taskInput").value.trim();
 
   if (!name || !text) {
-    alert("Nhập đủ thông tin");
+    alert("Nhập đủ tên và nhiệm vụ");
     return;
   }
 
@@ -83,102 +85,98 @@ window.addTask = function () {
   document.getElementById("taskInput").value = "";
 };
 
-/************* LOAD TASKS *************/
+/**************** RENDER TASK TABLE ****************/
 db.collection("tasks").onSnapshot(snapshot => {
-  const data = {};
-
+  const table = {};
   snapshot.forEach(doc => {
     const d = doc.data();
-    if (!data[d.name]) data[d.name] = {};
-    if (!data[d.name][d.day]) data[d.name][d.day] = [];
-    data[d.name][d.day].push({ id: doc.id, ...d });
+    if (!table[d.name]) table[d.name] = {};
+    if (!table[d.name][d.day]) table[d.name][d.day] = [];
+    table[d.name][d.day].push({ ...d, id: doc.id });
   });
 
-  renderTable(data);
-});
+  const tbody = document.getElementById("tableBody");
+  tbody.innerHTML = "";
 
-/************* RENDER TABLE *************/
-function renderTable(data) {
-  const tableBody = document.getElementById("tableBody");
-  tableBody.innerHTML = "";
-
-  Object.keys(data).forEach(name => {
+  Object.keys(table).forEach(name => {
     const tr = document.createElement("tr");
     tr.innerHTML = `<td><b>${name}</b></td>`;
 
-    days.forEach(day => {
+    DAYS.forEach(day => {
       const td = document.createElement("td");
-
-      (data[name][day] || []).forEach(t => {
-        td.innerHTML += `
-          <div>
+      if (table[name][day]) {
+        table[name][day].forEach(t => {
+          const div = document.createElement("div");
+          div.innerHTML = `
             <input type="checkbox" ${t.done ? "checked" : ""}
               onchange="toggleDone('${t.id}', this.checked)">
             ${t.text}
-            ${currentRole === "admin"
-              ? `<button onclick="deleteTask('${t.id}')">❌</button>`
-              : ""}
-          </div>
-        `;
-      });
-
+            ${currentRole === "admin" ? `<button onclick="deleteTask('${t.id}')">❌</button>` : ""}
+          `;
+          td.appendChild(div);
+        });
+      }
       tr.appendChild(td);
     });
 
-    tableBody.appendChild(tr);
+    tbody.appendChild(tr);
   });
-}
+});
 
-/************* TOGGLE DONE + LOG *************/
-window.toggleDone = function (id, value) {
-  const user = localStorage.getItem("user") || "unknown";
-
+/**************** TOGGLE DONE + LOG ****************/
+window.toggleDone = function (id, checked) {
   db.collection("tasks").doc(id).get().then(doc => {
     if (!doc.exists) return;
-
     const t = doc.data();
 
-    db.collection("tasks").doc(id).update({ done: value });
+    db.collection("tasks").doc(id).update({ done: checked });
 
-    db.collection("logs").add({
-      name: t.name,
-      day: t.day,
-      text: t.text,
-      actionBy: user,
-      done: value,
-      time: Date.now()
-    });
+    if (checked) {
+      db.collection("logs").add({
+        taskId: id,
+        name: t.name,
+        day: t.day,
+        text: t.text,
+        by: currentUser,
+        time: Date.now()
+      });
+    }
   });
 };
 
-/************* DELETE TASK *************/
-window.deleteTask = function (id) {
-  if (confirm("Xoá nhiệm vụ?")) {
-    db.collection("tasks").doc(id).delete();
-  }
+/**************** DELETE TASK + DELETE LOGS ****************/
+window.deleteTask = async function (id) {
+  if (!confirm("Xoá nhiệm vụ và toàn bộ lịch sử?")) return;
+
+  await db.collection("tasks").doc(id).delete();
+
+  const logs = await db.collection("logs")
+    .where("taskId", "==", id)
+    .get();
+
+  const batch = db.batch();
+  logs.forEach(doc => batch.delete(doc.ref));
+  await batch.commit();
 };
 
-/************* LOG TABLE *************/
+/**************** LOG TABLE ****************/
 db.collection("logs")
   .orderBy("time", "desc")
   .onSnapshot(snapshot => {
-    const logBody = document.getElementById("logBody");
-    if (!logBody) return;
+    const body = document.getElementById("logBody");
+    if (!body) return;
 
-    logBody.innerHTML = "";
-
+    body.innerHTML = "";
     snapshot.forEach(doc => {
       const l = doc.data();
       const tr = document.createElement("tr");
-
       tr.innerHTML = `
-        <td>${new Date(l.time).toLocaleString("vi-VN")}</td>
-        <td>${l.actionBy}</td>
+        <td>${new Date(l.time).toLocaleString()}</td>
+        <td>${l.by}</td>
         <td>${l.day}</td>
         <td>${l.text}</td>
-        <td>${l.done ? "✅ Hoàn thành" : "❌ Bỏ tick"}</td>
+        <td>✔️</td>
       `;
-
-      logBody.appendChild(tr);
+      body.appendChild(tr);
     });
   });
