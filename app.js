@@ -82,7 +82,7 @@ window.addTask = function () {
   const day = dayInput.value;
   const text = taskInput.value.trim();
 
-  if (!name || !text) {
+  if (!name || !day || !text) {
     alert("Nhập đầy đủ thông tin");
     return;
   }
@@ -159,11 +159,13 @@ function renderTable(data) {
 }
 
 /**************** HISTORY ****************/
-function addHistory(taskOwner, taskText) {
+function addHistory(employee, task) {
+  if (!employee || !task) return;
+
   db.collection("history").add({
-    taskOwner,               // người được giao
-    taskText,
-    checkedBy: currentUser,  // người tick
+    employee,
+    task,
+    checkedBy: currentUser,
     time: firebase.firestore.FieldValue.serverTimestamp()
   });
 }
@@ -176,12 +178,13 @@ function loadHistory() {
 
       snap.forEach(doc => {
         const d = doc.data();
-        if (!d.taskText || !d.checkedBy || !d.time) return;
+        if (!d.employee || !d.task || !d.time) return;
 
         const tr = document.createElement("tr");
         tr.innerHTML = `
+          <td>${d.employee}</td>
+          <td>${d.task}</td>
           <td>${d.checkedBy}</td>
-          <td>${d.taskText}</td>
           <td>${d.time.toDate().toLocaleString()}</td>
           <td class="admin-only">
             <button onclick="deleteHistory('${doc.id}')">❌</button>
@@ -193,18 +196,15 @@ function loadHistory() {
 }
 
 window.deleteHistory = function (id) {
-  if (!confirm("Xóa lịch sử này?")) return;
+  if (currentRole !== "admin") return;
   db.collection("history").doc(id).delete();
 };
 
-window.clearHistory = async function () {
+window.clearHistory = function () {
   if (currentRole !== "admin") return;
-  if (!confirm("XÓA TOÀN BỘ LỊCH SỬ?")) return;
+  if (!confirm("Xóa toàn bộ lịch sử?")) return;
 
-  const snap = await db.collection("history").get();
-  const batch = db.batch();
-  snap.forEach(d => batch.delete(d.ref));
-  await batch.commit();
-
-  alert("Đã xóa toàn bộ lịch sử");
+  db.collection("history").get().then(snap => {
+    snap.forEach(doc => doc.ref.delete());
+  });
 };
