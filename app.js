@@ -1,6 +1,6 @@
 console.log("APP JS LOADED");
 
-/* ================= LOGIN CỨNG ================= */
+/* ================= LOGIN (NỘI BỘ) ================= */
 const USERS = {
   admin: { password: "123", role: "admin" },
   emp1: { password: "123", role: "employee" },
@@ -10,8 +10,6 @@ const USERS = {
 let currentRole = null;
 
 window.login = function () {
-  console.log("LOGIN CLICKED");
-
   const u = document.getElementById("username").value.trim();
   const p = document.getElementById("password").value.trim();
 
@@ -112,7 +110,7 @@ window.addTask = function () {
   document.getElementById("taskInput").value = "";
 };
 
-/* ================= LISTENER ================= */
+/* ================= LISTEN TASKS ================= */
 function listenTasks() {
   db.collection("tasks").onSnapshot(snapshot => {
     const data = {};
@@ -131,8 +129,6 @@ function listenTasks() {
 /* ================= RENDER ================= */
 function renderTable(data) {
   const body = document.getElementById("tableBody");
-  if (!body) return;
-
   body.innerHTML = "";
 
   Object.keys(data).forEach(name => {
@@ -148,8 +144,11 @@ function renderTable(data) {
       (data[name][day] || []).forEach(t => {
         const div = document.createElement("div");
         div.innerHTML = `
-          <input type="checkbox" ${t.done ? "checked" : ""} onchange="toggleDone('${t.id}', this.checked)">
-          <span style="${t.done ? "text-decoration:line-through" : ""}">${t.text}</span>
+          <input type="checkbox" ${t.done ? "checked" : ""}
+            onchange="toggleDone('${t.id}', this.checked)">
+          <span style="${t.done ? "text-decoration:line-through" : ""}">
+            ${t.text}
+          </span>
           <button onclick="deleteTask('${t.id}')">❌</button>
         `;
         td.appendChild(div);
@@ -159,7 +158,7 @@ function renderTable(data) {
     });
 
     const noteTd = document.createElement("td");
-    noteTd.textContent = "";
+    noteTd.innerText = "";
     tr.appendChild(noteTd);
 
     body.appendChild(tr);
@@ -167,8 +166,8 @@ function renderTable(data) {
 }
 
 /* ================= ACTIONS ================= */
-window.toggleDone = function (id, val) {
-  db.collection("tasks").doc(id).update({ done: val });
+window.toggleDone = function (id, value) {
+  db.collection("tasks").doc(id).update({ done: value });
 };
 
 window.deleteTask = function (id) {
