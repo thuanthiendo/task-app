@@ -144,11 +144,29 @@ function renderTable(data) {
         };
 
         const span = document.createElement("span");
-        span.textContent = t.text;
+span.textContent = t.text;
 
-        div.appendChild(cb);
-        div.appendChild(span);
-        td.appendChild(div);
+div.appendChild(cb);
+div.appendChild(span);
+
+// 👉 NÚT XÓA NHIỆM VỤ
+if (currentRole === "admin" && t.done) {
+  const delBtn = document.createElement("button");
+  delBtn.textContent = "❌";
+  delBtn.style.marginLeft = "6px";
+  delBtn.style.cursor = "pointer";
+
+  delBtn.onclick = () => {
+    if (confirm("Xóa nhiệm vụ này?")) {
+      db.collection("tasks").doc(t.id).delete();
+    }
+  };
+
+  div.appendChild(delBtn);
+}
+
+td.appendChild(div);
+
       });
 
       tr.appendChild(td);
