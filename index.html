@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>Bảng nhiệm vụ 7 ngày</title>
-  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -12,7 +11,7 @@
   <h2>Đăng nhập</h2>
   <input id="username" placeholder="Tài khoản">
   <input id="password" type="password" placeholder="Mật khẩu">
-  <button type="button" onclick="login()">Đăng nhập</button>
+  <button onclick="login()">Đăng nhập</button>
 </div>
 
 <!-- APP -->
@@ -34,13 +33,10 @@
     </select>
     <input id="taskInput" placeholder="Nhiệm vụ">
     <button onclick="addTask()">➕ Thêm</button>
-    <button onclick="clearHistory()" style="margin-left:10px;color:red">
-      🗑️ Xóa toàn bộ lịch sử
-    </button>
+    <button onclick="clearHistory()" style="color:red">🗑️ Xóa toàn bộ lịch sử</button>
   </div>
 
-  <!-- TABLE -->
-  <table border="1" cellpadding="6" cellspacing="0" width="100%">
+  <table border="1" width="100%">
     <thead>
       <tr>
         <th>Tên</th>
@@ -53,14 +49,14 @@
   </table>
 
   <h3>📌 LỊCH SỬ HOÀN THÀNH</h3>
-  <table border="1" cellpadding="6" cellspacing="0" width="100%">
+  <table border="1" width="100%">
     <thead>
       <tr>
         <th>Thời gian</th>
         <th>Nhân viên</th>
         <th>Thứ</th>
         <th>Nhiệm vụ</th>
-        <th>Trạng thái</th>
+        <th>✔</th>
       </tr>
     </thead>
     <tbody id="historyBody"></tbody>
@@ -70,10 +66,8 @@
   <button onclick="logout()">Đăng xuất</button>
 </div>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
 <script src="app.js"></script>
 </body>
 </html>
