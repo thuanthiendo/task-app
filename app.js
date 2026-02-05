@@ -1,17 +1,17 @@
-/******** LOGIN ********/
+/***********************
+ * LOGIN CỨNG (NỘI BỘ)
+ ***********************/
 const USERS = {
   admin: { password: "123", role: "admin" },
-  hungtv: { password: "123", role: "admin" },
-  thiendt: { password: "123", role: "employee" },
-  khangpd: { password: "123", role: "employee" },
+  emp1: { password: "123", role: "employee" },
   emp2: { password: "123", role: "employee" }
 };
 
 let currentRole = null;
 
 window.login = function () {
-  const u = username.value.trim();
-  const p = password.value.trim();
+  const u = document.getElementById("username").value.trim();
+  const p = document.getElementById("password").value.trim();
 
   if (!USERS[u] || USERS[u].password !== p) {
     alert("Sai tài khoản hoặc mật khẩu");
@@ -21,12 +21,13 @@ window.login = function () {
   currentRole = USERS[u].role;
   localStorage.setItem("role", currentRole);
 
-  loginBox.style.display = "none";
-  app.style.display = "block";
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("app").style.display = "block";
+
   applyRole();
 };
 
-window.logout = () => {
+window.logout = function () {
   localStorage.clear();
   location.reload();
 };
@@ -37,16 +38,20 @@ function applyRole() {
   }
 }
 
-/******** AUTO LOGIN ********/
+/***********************
+ * AUTO LOGIN
+ ***********************/
 const savedRole = localStorage.getItem("role");
 if (savedRole) {
   currentRole = savedRole;
-  loginBox.style.display = "none";
-  app.style.display = "block";
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("app").style.display = "block";
   applyRole();
 }
 
-/******** FIREBASE ********/
+/***********************
+ * FIREBASE INIT
+ ***********************/
 firebase.initializeApp({
   apiKey: "AIzaSyB-ldnW85PPEL3Y4SAbWEotRvmTLtzgq8o",
   authDomain: "task-75413.firebaseapp.com",
@@ -55,48 +60,53 @@ firebase.initializeApp({
 
 const db = firebase.firestore();
 
-/******** DATE UTILS ********/
-function getWeekDays() {
+/***********************
+ * SET HEADER THỨ + NGÀY
+ ***********************/
+function setWeekHeader() {
   const today = new Date();
-  const monday = new Date(today.setDate(today.getDate() - today.getDay() + 1));
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - today.getDay() + 1);
 
-  const days = [];
-  const names = ["Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7","CN"];
+  const map = [
+    { id: "d2", label: "Thứ 2" },
+    { id: "d3", label: "Thứ 3" },
+    { id: "d4", label: "Thứ 4" },
+    { id: "d5", label: "Thứ 5" },
+    { id: "d6", label: "Thứ 6" },
+    { id: "d7", label: "Thứ 7" },
+    { id: "cn", label: "CN" },
+  ];
 
-  for (let i = 0; i < 7; i++) {
+  map.forEach((m, i) => {
     const d = new Date(monday);
     d.setDate(monday.getDate() + i);
-    days.push({
-      key: names[i],
-      label: `${names[i]} (${d.getDate()}/${d.getMonth()+1})`
-    });
-  }
-  return days;
+    const th = document.getElementById(m.id);
+    if (th) {
+      th.innerText = `${m.label} (${d.getDate()}/${d.getMonth() + 1})`;
+    }
+  });
 }
 
-const weekDays = getWeekDays();
+setWeekHeader();
 
-/******** INIT HEADER + SELECT ********/
-const headerRow = document.getElementById("headerRow");
-const dayInput = document.getElementById("dayInput");
+/***********************
+ * CONSTANTS
+ ***********************/
+const DAYS = ["Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7","CN"];
 
-weekDays.forEach(d => {
-  headerRow.innerHTML += `<th>${d.label}</th>`;
-  dayInput.innerHTML += `<option value="${d.key}">${d.label}</option>`;
-});
-
-headerRow.innerHTML += `<th>Ghi chú</th>`;
-
-/******** ADD TASK ********/
+/***********************
+ * ADD TASK (ADMIN)
+ ***********************/
 window.addTask = function () {
   if (currentRole !== "admin") return;
 
-  const name = nameInput.value.trim();
-  const day = dayInput.value;
-  const text = taskInput.value.trim();
+  const name = document.getElementById("nameInput").value.trim();
+  const day = document.getElementById("dayInput").value;
+  const text = document.getElementById("taskInput").value.trim();
 
   if (!name || !text) {
-    alert("Nhập đủ thông tin");
+    alert("Nhập đủ tên và nhiệm vụ");
     return;
   }
 
@@ -109,14 +119,62 @@ window.addTask = function () {
     createdAt: Date.now()
   });
 
-  taskInput.value = "";
+  document.getElementById("taskInput").value = "";
 };
 
-/******** RENDER ********/
+/***********************
+ * REALTIME LISTENER
+ ***********************/
 db.collection("tasks").onSnapshot(snapshot => {
   const data = {};
+
   snapshot.forEach(doc => {
     const d = doc.data();
-    if (!data[d.name]) data[d.name] = { tasks:{}, notes:{} };
-    if (!data[d.name].tasks[d.day]) data[d.name].tasks[d.day] = [];
-    data[d.name].tasks[d]()
+    if (!data[d.name]) data[d.name] = {};
+    if (!data[d.name][d.day]) data[d.name][d.day] = [];
+    data[d.name][d.day].push({ id: doc.id, ...d });
+  });
+
+  renderTable(data);
+});
+
+/***********************
+ * RENDER TABLE
+ ***********************/
+function renderTable(data) {
+  const body = document.getElementById("tableBody");
+  body.innerHTML = "";
+
+  Object.keys(data).forEach(name => {
+    const tr = document.createElement("tr");
+
+    // TÊN
+    const nameTd = document.createElement("td");
+    nameTd.innerHTML = `<b>${name}</b>`;
+    tr.appendChild(nameTd);
+
+    // NGÀY
+    DAYS.forEach(day => {
+      const td = document.createElement("td");
+
+      (data[name][day] || []).forEach(t => {
+        const div = document.createElement("div");
+        div.innerHTML = `
+          <input type="checkbox" ${t.done ? "checked" : ""}
+            onchange="toggleDone('${t.id}', this.checked)">
+          <span style="${t.done ? "text-decoration:line-through" : ""}">
+            ${t.text}
+          </span>
+          ${currentRole === "admin" ? `<button onclick="deleteTask('${t.id}')">❌</button>` : ""}
+        `;
+        td.appendChild(div);
+      });
+
+      tr.appendChild(td);
+    });
+
+    // GHI CHÚ
+    const noteTd = document.createElement("td");
+    noteTd.innerHTML = `
+      <textarea rows="3" style="width:100%"
+        placeholder="
