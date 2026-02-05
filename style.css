@@ -1,56 +1,49 @@
 body {
   font-family: Arial, sans-serif;
-  background: #f4f6f8;
+  background: #f5f6fa;
+  margin: 0;
   padding: 20px;
-}
-
-h1, h2 {
-  margin-top: 20px;
 }
 
 .login-box {
-  max-width: 300px;
-  margin: 80px auto;
-  padding: 20px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 0 10px #ccc;
+  width: 360px;
+  margin: 120px auto;
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0,0,0,.1);
 }
 
-.login-box input {
+.login-box input,
+.login-box button {
   width: 100%;
-  margin: 8px 0;
-  padding: 8px;
+  padding: 10px;
+  margin-top: 12px;
+  font-size: 16px;
 }
 
 button {
-  padding: 6px 10px;
-  margin: 4px;
   cursor: pointer;
-}
-
-.danger {
-  background: #ff4d4d;
-  color: white;
-  border: none;
-}
-
-.add-box {
-  margin-bottom: 10px;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  background: white;
+  margin-top: 15px;
+  background: #fff;
 }
 
 th, td {
-  border: 1px solid #ccc;
-  padding: 6px;
+  border: 1px solid #ddd;
+  padding: 8px;
   vertical-align: top;
 }
 
-td div {
-  margin-bottom: 4px;
+th {
+  background: #f0f0f0;
+}
+
+.add-task input, .add-task select {
+  padding: 8px;
+  margin-right: 5px;
 }
