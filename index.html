@@ -7,7 +7,7 @@
 </head>
 <body>
 
-<!-- LOGIN -->
+<!-- ================= LOGIN ================= -->
 <div id="loginBox">
   <h2>Đăng nhập</h2>
   <input id="username" placeholder="Tên đăng nhập">
@@ -15,12 +15,15 @@
   <button type="button" onclick="login()">Đăng nhập</button>
 </div>
 
-<!-- APP -->
+<!-- ================= APP ================= -->
 <div id="app" style="display:none">
+
   <h2>BẢNG NHIỆM VỤ (7 NGÀY)</h2>
 
+  <!-- ADD TASK (ADMIN ONLY) -->
   <div class="add-box admin-only">
     <input id="nameInput" placeholder="Tên nhân viên" />
+
     <select id="dayInput">
       <option>Thứ 2</option>
       <option>Thứ 3</option>
@@ -30,30 +33,57 @@
       <option>Thứ 7</option>
       <option>CN</option>
     </select>
+
     <input id="taskInput" placeholder="Nhiệm vụ" />
     <button type="button" onclick="addTask()">➕ Thêm</button>
   </div>
 
-  <table>
+  <!-- TASK TABLE -->
+  <table border="1" cellpadding="6" cellspacing="0">
     <thead>
       <tr>
         <th>Tên</th>
-        <th>T2</th><th>T3</th><th>T4</th>
-        <th>T5</th><th>T6</th><th>T7</th><th>CN</th>
+        <th>T2</th>
+        <th>T3</th>
+        <th>T4</th>
+        <th>T5</th>
+        <th>T6</th>
+        <th>T7</th>
+        <th>CN</th>
       </tr>
     </thead>
     <tbody id="tableBody"></tbody>
   </table>
 
+  <br><br>
+
+  <!-- ================= LOG TABLE ================= -->
+  <h3>📌 LỊCH SỬ HOÀN THÀNH CÔNG VIỆC</h3>
+
+  <table border="1" cellpadding="6" cellspacing="0">
+    <thead>
+      <tr>
+        <th>Thời gian</th>
+        <th>Người thực hiện</th>
+        <th>Thứ</th>
+        <th>Nhiệm vụ</th>
+        <th>Trạng thái</th>
+      </tr>
+    </thead>
+    <tbody id="logBody"></tbody>
+  </table>
+
   <br>
+
   <button type="button" onclick="logout()">Đăng xuất</button>
+
 </div>
 
-<!-- Firebase (PHẢI load TRƯỚC app.js) -->
+<!-- ================= FIREBASE ================= -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-<!-- App -->
+<!-- ================= APP JS ================= -->
 <script src="app.js" defer></script>
 
 </body>
