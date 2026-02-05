@@ -15,9 +15,6 @@
 </div>
 
 <div id="app" style="display:none">
-  <!-- TOÀN BỘ APP + BẢNG Ở TRONG ĐÂY -->
-</div>
-<div id="app" style="display:none">
 
   <h2>BẢNG NHIỆM VỤ (7 NGÀY)</h2>
 
@@ -28,23 +25,22 @@
     <button onclick="addTask()">➕ Thêm</button>
   </div>
 
- <table>
-  <thead>
-    <tr>
-      <th>Tên</th>
-      <th id="d2">Thứ 2</th>
-      <th id="d3">Thứ 3</th>
-      <th id="d4">Thứ 4</th>
-      <th id="d5">Thứ 5</th>
-      <th id="d6">Thứ 6</th>
-      <th id="d7">Thứ 7</th>
-      <th id="cn">CN</th>
-      <th>Ghi chú</th>
-    </tr>
-  </thead>
-  <tbody id="tableBody"></tbody>
-</table>
-
+  <table>
+    <thead>
+      <tr>
+        <th>Tên</th>
+        <th id="d2">Thứ 2</th>
+        <th id="d3">Thứ 3</th>
+        <th id="d4">Thứ 4</th>
+        <th id="d5">Thứ 5</th>
+        <th id="d6">Thứ 6</th>
+        <th id="d7">Thứ 7</th>
+        <th id="cn">CN</th>
+        <th>Ghi chú</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
 
   <br>
   <button onclick="logout()">Đăng xuất</button>
@@ -53,10 +49,7 @@
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-  
+
 <script src="app.js"></script>
 </body>
 </html>
-
-
-
