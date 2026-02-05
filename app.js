@@ -7,9 +7,10 @@ const USERS = {
 
 let currentRole = null;
 
+/************* LOGIN *************/
 window.login = function () {
-  const u = username.value.trim();
-  const p = password.value.trim();
+  const u = document.getElementById("username").value.trim();
+  const p = document.getElementById("password").value.trim();
 
   if (!USERS[u] || USERS[u].password !== p) {
     alert("Sai tài khoản hoặc mật khẩu");
@@ -18,9 +19,11 @@ window.login = function () {
 
   currentRole = USERS[u].role;
   localStorage.setItem("role", currentRole);
+  localStorage.setItem("user", u);
 
-  loginBox.style.display = "none";
-  app.style.display = "block";
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("app").style.display = "block";
+
   applyRole();
 };
 
@@ -39,8 +42,8 @@ function applyRole() {
 const savedRole = localStorage.getItem("role");
 if (savedRole) {
   currentRole = savedRole;
-  loginBox.style.display = "none";
-  app.style.display = "block";
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("app").style.display = "block";
   applyRole();
 }
 
@@ -56,13 +59,13 @@ const db = firebase.firestore();
 
 const days = ["Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7","CN"];
 
-/************* TASK *************/
+/************* ADD TASK *************/
 window.addTask = function () {
   if (currentRole !== "admin") return;
 
-  const name = nameInput.value.trim();
-  const day = dayInput.value;
-  const text = taskInput.value.trim();
+  const name = document.getElementById("nameInput").value.trim();
+  const day = document.getElementById("dayInput").value;
+  const text = document.getElementById("taskInput").value.trim();
 
   if (!name || !text) {
     alert("Nhập đủ thông tin");
@@ -70,26 +73,33 @@ window.addTask = function () {
   }
 
   db.collection("tasks").add({
-    name, day, text,
+    name,
+    day,
+    text,
     done: false,
     createdAt: Date.now()
   });
 
-  taskInput.value = "";
+  document.getElementById("taskInput").value = "";
 };
 
+/************* LOAD TASKS *************/
 db.collection("tasks").onSnapshot(snapshot => {
   const data = {};
+
   snapshot.forEach(doc => {
     const d = doc.data();
     if (!data[d.name]) data[d.name] = {};
     if (!data[d.name][d.day]) data[d.name][d.day] = [];
     data[d.name][d.day].push({ id: doc.id, ...d });
   });
+
   renderTable(data);
 });
 
+/************* RENDER TABLE *************/
 function renderTable(data) {
+  const tableBody = document.getElementById("tableBody");
   tableBody.innerHTML = "";
 
   Object.keys(data).forEach(name => {
@@ -98,16 +108,20 @@ function renderTable(data) {
 
     days.forEach(day => {
       const td = document.createElement("td");
+
       (data[name][day] || []).forEach(t => {
         td.innerHTML += `
           <div>
             <input type="checkbox" ${t.done ? "checked" : ""}
               onchange="toggleDone('${t.id}', this.checked)">
             ${t.text}
-            ${currentRole === "admin" ? `<button onclick="deleteTask('${t.id}')">❌</button>` : ""}
+            ${currentRole === "admin"
+              ? `<button onclick="deleteTask('${t.id}')">❌</button>`
+              : ""}
           </div>
         `;
       });
+
       tr.appendChild(td);
     });
 
@@ -115,10 +129,56 @@ function renderTable(data) {
   });
 }
 
-window.toggleDone = (id, v) =>
-  db.collection("tasks").doc(id).update({ done: v });
+/************* TOGGLE DONE + LOG *************/
+window.toggleDone = function (id, value) {
+  const user = localStorage.getItem("user") || "unknown";
 
-window.deleteTask = id => {
-  if (confirm("Xoá nhiệm vụ?"))
-    db.collection("tasks").doc(id).delete();
+  db.collection("tasks").doc(id).get().then(doc => {
+    if (!doc.exists) return;
+
+    const t = doc.data();
+
+    db.collection("tasks").doc(id).update({ done: value });
+
+    db.collection("logs").add({
+      name: t.name,
+      day: t.day,
+      text: t.text,
+      actionBy: user,
+      done: value,
+      time: Date.now()
+    });
+  });
 };
+
+/************* DELETE TASK *************/
+window.deleteTask = function (id) {
+  if (confirm("Xoá nhiệm vụ?")) {
+    db.collection("tasks").doc(id).delete();
+  }
+};
+
+/************* LOG TABLE *************/
+db.collection("logs")
+  .orderBy("time", "desc")
+  .onSnapshot(snapshot => {
+    const logBody = document.getElementById("logBody");
+    if (!logBody) return;
+
+    logBody.innerHTML = "";
+
+    snapshot.forEach(doc => {
+      const l = doc.data();
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>${new Date(l.time).toLocaleString("vi-VN")}</td>
+        <td>${l.actionBy}</td>
+        <td>${l.day}</td>
+        <td>${l.text}</td>
+        <td>${l.done ? "✅ Hoàn thành" : "❌ Bỏ tick"}</td>
+      `;
+
+      logBody.appendChild(tr);
+    });
+  });
