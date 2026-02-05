@@ -1,4 +1,4 @@
-/************ LOGIN NỘI BỘ ************/
+/************* LOGIN *************/
 const USERS = {
   admin: { password: "123", role: "admin" },
   emp1: { password: "123", role: "employee" },
@@ -6,26 +6,9 @@ const USERS = {
 };
 
 let currentUser = null;
+let currentRole = null;
 
-/************ FIREBASE ************/
-firebase.initializeApp({
-  apiKey: "AIzaSyB-ldnW85PPEL3Y4SAbWEotRvmTLtzgq8o",
-  authDomain: "task-75413.firebaseapp.com",
-  projectId: "task-75413"
-});
-const db = firebase.firestore();
-
-/************ AUTO LOGIN (FIX F5) ************/
-window.onload = () => {
-  const saved = localStorage.getItem("user");
-  if (saved) {
-    currentUser = JSON.parse(saved);
-    showApp();
-  }
-};
-
-/************ LOGIN ************/
-function login() {
+window.login = function () {
   const u = username.value.trim();
   const p = password.value.trim();
 
@@ -34,113 +17,113 @@ function login() {
     return;
   }
 
-  currentUser = { name: u, role: USERS[u].role };
-  localStorage.setItem("user", JSON.stringify(currentUser));
-  showApp();
-}
+  currentUser = u;
+  currentRole = USERS[u].role;
 
-function logout() {
-  localStorage.removeItem("user");
-  location.reload();
-}
+  localStorage.setItem("user", u);
+  localStorage.setItem("role", currentRole);
 
-function showApp() {
   loginBox.style.display = "none";
   app.style.display = "block";
+  applyRole();
+};
 
-  if (currentUser.role !== "admin") {
-    document.querySelectorAll(".admin-only")
-      .forEach(e => e.style.display = "none");
+window.logout = function () {
+  localStorage.clear();
+  location.reload();
+};
+
+function applyRole() {
+  if (currentRole !== "admin") {
+    document.querySelectorAll(".admin-only").forEach(e => e.remove());
   }
-
-  loadTasks();
-  loadHistory();
 }
 
-/************ TASK ************/
-async function addTask() {
-  if (currentUser.role !== "admin") return;
+/************* AUTO LOGIN (FIX F5) *************/
+const savedUser = localStorage.getItem("user");
+const savedRole = localStorage.getItem("role");
 
+if (savedUser && savedRole) {
+  currentUser = savedUser;
+  currentRole = savedRole;
+  loginBox.style.display = "none";
+  app.style.display = "block";
+  applyRole();
+}
+
+/************* FIREBASE *************/
+firebase.initializeApp({
+  apiKey: "AIzaSyB-ldnW85PPEL3Y4SAbWEotRvmTLtzgq8o",
+  authDomain: "task-75413.firebaseapp.com",
+  projectId: "task-75413"
+});
+
+const db = firebase.firestore();
+const days = ["Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7","CN"];
+
+/************* ADD TASK *************/
+window.addTask = function () {
   const name = nameInput.value.trim();
   const day = dayInput.value;
   const task = taskInput.value.trim();
-  if (!name || !task) return;
 
-  await db.collection("tasks").add({
-    name, day, task, done: false
-  });
+  if (!name || !task) return alert("Nhập đủ thông tin");
 
+  db.collection("tasks").add({ name, day, task });
   taskInput.value = "";
-  loadTasks();
-}
+};
 
-async function toggleDone(id, data) {
-  await db.collection("history").add({
-    name: currentUser.name,
-    day: data.day,
-    task: data.task,
-    time: new Date().toLocaleString(),
-    status: "✔"
-  });
-
-  await db.collection("tasks").doc(id).delete();
-  loadTasks();
-  loadHistory();
-}
-
-async function deleteTask(id) {
-  if (!confirm("Xóa nhiệm vụ & toàn bộ lịch sử liên quan?")) return;
-
-  const taskDoc = await db.collection("tasks").doc(id).get();
-  const task = taskDoc.data().task;
-
-  const his = await db.collection("history")
-    .where("task", "==", task).get();
-
-  his.forEach(d => d.ref.delete());
-  await db.collection("tasks").doc(id).delete();
-
-  loadTasks();
-  loadHistory();
-}
-
-/************ LOAD ************/
-async function loadTasks() {
-  tableBody.innerHTML = "";
-  const snap = await db.collection("tasks").get();
-  const map = {};
-
+/************* RENDER TASK *************/
+db.collection("tasks").onSnapshot(snap => {
+  const data = {};
   snap.forEach(d => {
     const t = d.data();
-    if (!map[t.name]) map[t.name] = {};
-    map[t.name][t.day] = { ...t, id: d.id };
+    if (!data[t.name]) data[t.name] = {};
+    if (!data[t.name][t.day]) data[t.name][t.day] = [];
+    data[t.name][t.day].push({ id: d.id, ...t });
   });
+  renderTable(data);
+});
 
-  Object.keys(map).forEach(name => {
+function renderTable(data) {
+  tableBody.innerHTML = "";
+  Object.keys(data).forEach(name => {
     const tr = document.createElement("tr");
     tr.innerHTML = `<td><b>${name}</b></td>`;
 
-    ["Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7","CN"]
-      .forEach(day => {
-        const td = document.createElement("td");
-        if (map[name][day]) {
-          const t = map[name][day];
-          td.innerHTML = `
-            ${t.task}
-            <br><button onclick='toggleDone("${t.id}",${JSON.stringify(t)})'>✔</button>
-          `;
-        }
-        tr.appendChild(td);
+    days.forEach(day => {
+      const td = document.createElement("td");
+      (data[name][day] || []).forEach(t => {
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.onclick = () => completeTask(t);
+        td.append(cb, document.createTextNode(" " + t.task), document.createElement("br"));
       });
+      tr.appendChild(td);
+    });
 
-    tr.innerHTML += `<td><button onclick="deleteTask('${Object.values(map[name])[0].id}')">🗑️</button></td>`;
+    const del = document.createElement("td");
+    del.innerHTML = `<button onclick="deleteUser('${name}')">❌</button>`;
+    tr.appendChild(del);
+
     tableBody.appendChild(tr);
   });
 }
 
-async function loadHistory() {
+/************* COMPLETE TASK *************/
+function completeTask(t) {
+  db.collection("history").add({
+    name: currentUser,
+    day: t.day,
+    task: t.task,
+    time: new Date().toLocaleString()
+  });
+  db.collection("tasks").doc(t.id).delete();
+}
+
+/************* HISTORY *************/
+db.collection("history").orderBy("time", "desc").onSnapshot(snap => {
   historyBody.innerHTML = "";
-  const snap = await db.collection("history").orderBy("time","desc").get();
   snap.forEach(d => {
     const h = d.data();
     historyBody.innerHTML += `
@@ -149,15 +132,29 @@ async function loadHistory() {
         <td>${h.name}</td>
         <td>${h.day}</td>
         <td>${h.task}</td>
-        <td>${h.status}</td>
+        <td>✔</td>
       </tr>`;
   });
-}
+});
 
-/************ CLEAR HISTORY ************/
-async function clearHistory() {
-  if (!confirm("XÓA TOÀN BỘ LỊCH SỬ?")) return;
-  const snap = await db.collection("history").get();
-  snap.forEach(d => d.ref.delete());
-  loadHistory();
-}
+/************* DELETE USER TASK + HISTORY *************/
+window.deleteUser = function (name) {
+  if (!confirm("Xóa toàn bộ nhiệm vụ & lịch sử của " + name + "?")) return;
+
+  db.collection("tasks").where("name","==",name).get()
+    .then(s => s.forEach(d => d.ref.delete()));
+
+  db.collection("history").where("name","==",name).get()
+    .then(s => s.forEach(d => d.ref.delete()));
+};
+
+/************* CLEAR ALL HISTORY (FIX) *************/
+window.clearHistory = function () {
+  if (!confirm("Xóa TOÀN BỘ lịch sử?")) return;
+
+  db.collection("history").get().then(snap => {
+    const batch = db.batch();
+    snap.forEach(doc => batch.delete(doc.ref));
+    return batch.commit();
+  });
+};
