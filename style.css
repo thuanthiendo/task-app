@@ -46,4 +46,44 @@ th {
 .add-task input, .add-task select {
   padding: 8px;
   margin-right: 5px;
+}  
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* QUAN TRỌNG */
 }
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  vertical-align: top;
+  word-wrap: break-word;
+}
+
+/* Cột tên */
+th:first-child,
+td:first-child {
+  width: 140px;
+  font-weight: bold;
+}
+
+/* Các cột thứ */
+th:not(:first-child),
+td:not(:first-child) {
+  width: calc((100% - 140px) / 7);
+}
+
+/* Task item */
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+  white-space: normal;
+}
+
+.task-item input[type="checkbox"] {
+  flex-shrink: 0;
+}
+
+
