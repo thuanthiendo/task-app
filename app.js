@@ -17,6 +17,17 @@ const USERS = {
 let currentUser = null;
 let currentRole = null;
 
+/**************** FIREBASE ****************/
+firebase.initializeApp({
+  apiKey: "AIzaSyB-ldnW85PPEL3Y4SAbWEotRvmTLtzgq8o",
+  authDomain: "task-75413.firebaseapp.com",
+  projectId: "task-75413"
+});
+const db = firebase.firestore();
+
+const days = ["Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7","CN"];
+
+/**************** LOGIN ****************/
 window.login = function () {
   const u = username.value.trim().toLowerCase();
   const p = password.value.trim();
@@ -36,8 +47,7 @@ window.login = function () {
   app.style.display = "block";
 
   applyRole();
-  loadTasks();
-  loadHistory();
+  startApp();
 };
 
 window.logout = function () {
@@ -51,29 +61,28 @@ function applyRole() {
   }
 }
 
-/******** AUTO LOGIN ********/
-const savedUser = localStorage.getItem("user");
-const savedRole = localStorage.getItem("role");
+/******** AUTO LOGIN (FIX F5) ********/
+window.addEventListener("DOMContentLoaded", () => {
+  const u = localStorage.getItem("user");
+  const r = localStorage.getItem("role");
 
-if (savedUser && savedRole) {
-  currentUser = savedUser;
-  currentRole = savedRole;
-  loginBox.style.display = "none";
-  app.style.display = "block";
-  applyRole();
+  if (u && r) {
+    currentUser = u;
+    currentRole = r;
+
+    loginBox.style.display = "none";
+    app.style.display = "block";
+
+    applyRole();
+    startApp();
+  }
+});
+
+/**************** START ****************/
+function startApp() {
   loadTasks();
   loadHistory();
 }
-
-/**************** FIREBASE ****************/
-firebase.initializeApp({
-  apiKey: "AIzaSyB-ldnW85PPEL3Y4SAbWEotRvmTLtzgq8o",
-  authDomain: "task-75413.firebaseapp.com",
-  projectId: "task-75413"
-});
-
-const db = firebase.firestore();
-const days = ["Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7","CN"];
 
 /**************** TASK ****************/
 window.addTask = function () {
@@ -83,39 +92,30 @@ window.addTask = function () {
   const day = dayInput.value;
   const text = taskInput.value.trim();
 
-  if (!name || !text) {
-    alert("Nhập đủ thông tin");
-    return;
-  }
+  if (!name || !text) return alert("Nhập đủ thông tin");
 
   db.collection("tasks").add({
     name,
     day,
     text,
-    done: false,
-    createdAt: Date.now()
+    done: false
   });
 
   taskInput.value = "";
 };
 
 function loadTasks() {
-  db.collection("tasks").onSnapshot(snapshot => {
+  db.collection("tasks").onSnapshot(snap => {
     const data = {};
 
-    snapshot.forEach(doc => {
+    snap.forEach(doc => {
       const d = doc.data();
-
-      // ❌ bỏ task lỗi (tránh undefined)
-      if (!d.name || !d.day || !d.text) return;
+      if (!d.name) return;
 
       if (!data[d.name]) data[d.name] = {};
       if (!data[d.name][d.day]) data[d.name][d.day] = [];
 
-      data[d.name][d.day].push({
-        id: doc.id,
-        ...d
-      });
+      data[d.name][d.day].push({ id: doc.id, ...d });
     });
 
     renderTable(data);
@@ -136,20 +136,14 @@ function renderTable(data) {
         const div = document.createElement("div");
         div.style.display = "flex";
         div.style.alignItems = "center";
-        div.style.gap = "6px";
+        div.style.gap = "5px";
 
         div.innerHTML = `
           <input type="checkbox" ${t.done ? "checked" : ""}
-            onchange="toggleDone('${t.id}', ${!t.done}, '${name}', '${day}', '${t.text}')">
-
-          <span style="${t.done ? "text-decoration:line-through;color:#888" : ""}">
+            onchange="toggleDone('${t.id}', ${!t.done}, '${name}', '${t.text}')">
+          <span style="${t.done ? "text-decoration:line-through" : ""}">
             ${t.text}
           </span>
-
-          ${currentRole === "admin"
-            ? `<button onclick="deleteTask('${t.id}')" style="border:none;background:none;color:red;cursor:pointer">❌</button>`
-            : ""
-          }
         `;
 
         td.appendChild(div);
@@ -163,71 +157,40 @@ function renderTable(data) {
 }
 
 /**************** DONE + HISTORY ****************/
-window.toggleDone = function (id, value, taskOwner, day, taskText) {
-  db.collection("tasks").doc(id).update({ done: value });
+function toggleDone(id, done, name, task) {
+  db.collection("tasks").doc(id).update({ done });
 
-  if (value === true) {
+  if (done) {
     db.collection("history").add({
-      taskOwner,           // người được giao
-      checkedBy: currentUser, // người tick
-      day,
-      task: taskText,
-      time: Date.now()
+      name,
+      task,
+      time: new Date().toLocaleString()
     });
   }
-};
+}
 
-window.deleteTask = function (id) {
-  if (!confirm("Xóa nhiệm vụ này?")) return;
-  db.collection("tasks").doc(id).delete();
-};
-
-/**************** HISTORY ****************/
 function loadHistory() {
-  const historyBody = document.getElementById("historyBody");
-
-  db.collection("history")
-    .orderBy("time", "desc")
-    .onSnapshot(snapshot => {
+  db.collection("history").orderBy("time","desc")
+    .onSnapshot(snap => {
       historyBody.innerHTML = "";
 
-      snapshot.forEach(doc => {
-        const h = doc.data();
+      snap.forEach(doc => {
+        const d = doc.data();
         const tr = document.createElement("tr");
 
         tr.innerHTML = `
-          <td>${new Date(h.time).toLocaleString()}</td>
-          <td>${h.checkedBy}</td>
-          <td>${h.taskOwner}</td>
-          <td>${h.day}</td>
-          <td>${h.task}</td>
-          <td>
-            <button onclick="deleteHistory('${doc.id}')"
-              style="border:none;background:none;color:red;cursor:pointer">
-              ❌
-            </button>
-          </td>
+          <td>${d.name}</td>
+          <td>${d.task}</td>
+          <td>${d.time}</td>
+          ${currentRole === "admin"
+            ? `<td><button onclick="deleteHistory('${doc.id}')">❌</button></td>`
+            : ""}
         `;
-
         historyBody.appendChild(tr);
       });
     });
 }
 
-window.deleteHistory = function (id) {
-  if (!confirm("Xóa lịch sử này?")) return;
+function deleteHistory(id) {
   db.collection("history").doc(id).delete();
-};
-
-window.clearHistory = async function () {
-  if (currentRole !== "admin") return;
-  if (!confirm("Xóa TOÀN BỘ lịch sử?")) return;
-
-  const snap = await db.collection("history").get();
-  const batch = db.batch();
-
-  snap.forEach(doc => batch.delete(doc.ref));
-  await batch.commit();
-
-  alert("Đã xóa toàn bộ lịch sử");
-};
+}
