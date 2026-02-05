@@ -7,9 +7,20 @@
 </head>
 <body>
 
+<!-- LOGIN -->
+<div id="loginBox">
+  <h2>Đăng nhập</h2>
+  <input id="username" placeholder="Tên đăng nhập">
+  <input id="password" type="password" placeholder="Mật khẩu">
+  <button onclick="login()">Đăng nhập</button>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+
 <h2>BẢNG NHIỆM VỤ (7 NGÀY)</h2>
 
-<div class="add-box">
+<div class="add-box admin-only">
   <input id="nameInput" placeholder="Tên nhân viên" />
   <select id="dayInput">
     <option>Thứ 2</option>
@@ -39,6 +50,11 @@
   </thead>
   <tbody id="tableBody"></tbody>
 </table>
+
+<br>
+<button onclick="logout()">Đăng xuất</button>
+
+</div>
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
