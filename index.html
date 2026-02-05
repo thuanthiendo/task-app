@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Bảng phân công công việc</title>
 
+  <!-- FIREBASE -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
@@ -11,37 +12,59 @@
 </head>
 <body>
 
+<!-- ================= LOGIN ================= -->
 <div id="loginBox" class="login-box">
-  <h2>Đăng nhập</h2>
+  <h2>🔐 Đăng nhập</h2>
   <input id="username" placeholder="Tài khoản">
   <input id="password" type="password" placeholder="Mật khẩu">
   <button onclick="login()">Đăng nhập</button>
 </div>
 
+<!-- ================= APP ================= -->
 <div id="app" style="display:none">
+
   <h1>📋 BẢNG PHÂN CÔNG CÔNG VIỆC</h1>
 
+  <!-- ===== ADMIN ADD TASK ===== -->
   <div class="admin-only add-task">
     <input id="nameInput" placeholder="Tên nhân viên">
+
     <select id="dayInput">
-      <option>Thứ 2</option><option>Thứ 3</option><option>Thứ 4</option>
-      <option>Thứ 5</option><option>Thứ 6</option><option>Thứ 7</option><option>CN</option>
+      <option>Thứ 2</option>
+      <option>Thứ 3</option>
+      <option>Thứ 4</option>
+      <option>Thứ 5</option>
+      <option>Thứ 6</option>
+      <option>Thứ 7</option>
+      <option>CN</option>
     </select>
+
     <input id="taskInput" placeholder="Nhiệm vụ">
+
+    <!-- ⏰ GIỜ PHÚT -->
+    <input id="timeInput" type="time">
+
     <button onclick="addTask()">➕ Thêm</button>
   </div>
 
+  <!-- ===== TASK TABLE ===== -->
   <table>
     <thead>
       <tr>
         <th>Tên</th>
-        <th>Thứ 2</th><th>Thứ 3</th><th>Thứ 4</th>
-        <th>Thứ 5</th><th>Thứ 6</th><th>Thứ 7</th><th>CN</th>
+        <th>Thứ 2</th>
+        <th>Thứ 3</th>
+        <th>Thứ 4</th>
+        <th>Thứ 5</th>
+        <th>Thứ 6</th>
+        <th>Thứ 7</th>
+        <th>CN</th>
       </tr>
     </thead>
     <tbody id="tableBody"></tbody>
   </table>
 
+  <!-- ================= HISTORY ================= -->
   <h2>📜 LỊCH SỬ HOÀN THÀNH</h2>
 
   <button class="admin-only" onclick="clearHistory()">🗑️ Xóa toàn bộ lịch sử</button>
@@ -62,6 +85,8 @@
   <button onclick="logout()">Đăng xuất</button>
 </div>
 
+<!-- APP SCRIPT -->
 <script src="app.js"></script>
+
 </body>
 </html>
