@@ -17,7 +17,7 @@ let currentUser = null;
 let currentRole = null;
 
 window.login = function () {
-  const u = username.value.trim();
+  const u = username.value.trim().toLowerCase();
   const p = password.value.trim();
 
   if (!USERS[u] || USERS[u].password !== p) {
@@ -38,6 +38,7 @@ window.login = function () {
   loadTasks();
   loadHistory();
 };
+
 
 window.logout = function () {
   localStorage.clear();
