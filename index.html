@@ -3,54 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <title>Bảng phân công công việc</title>
-  <link rel="stylesheet" href="style.css">
 
   <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <!-- LOGIN -->
-<div id="loginBox">
+<div id="loginBox" class="login-box">
   <h2>Đăng nhập</h2>
-  <input id="username" placeholder="Tên đăng nhập">
+  <input id="username" placeholder="Tài khoản">
   <input id="password" type="password" placeholder="Mật khẩu">
   <button onclick="login()">Đăng nhập</button>
 </div>
 
 <!-- APP -->
 <div id="app" style="display:none">
-  <h2>BẢNG PHÂN CÔNG CÔNG VIỆC (7 NGÀY)</h2>
 
+  <h1>📋 BẢNG PHÂN CÔNG CÔNG VIỆC (7 NGÀY)</h1>
+
+  <!-- ADD TASK -->
   <div class="add-box admin-only">
     <input id="nameInput" placeholder="Tên nhân viên">
     <select id="dayInput">
-      <option>Thứ 2</option>
-      <option>Thứ 3</option>
-      <option>Thứ 4</option>
-      <option>Thứ 5</option>
-      <option>Thứ 6</option>
-      <option>Thứ 7</option>
-      <option>CN</option>
+      <option>Thứ 2</option><option>Thứ 3</option><option>Thứ 4</option>
+      <option>Thứ 5</option><option>Thứ 6</option><option>Thứ 7</option><option>CN</option>
     </select>
     <input id="taskInput" placeholder="Nhiệm vụ">
     <button onclick="addTask()">➕ Thêm</button>
-    <button onclick="clearHistory()" style="color:red">🗑 Xóa toàn bộ lịch sử</button>
+    <button onclick="clearHistory()" class="danger">🗑 Xóa toàn bộ lịch sử</button>
   </div>
 
+  <!-- TASK TABLE -->
   <table>
     <thead>
       <tr>
         <th>Tên</th>
-        <th>T2</th><th>T3</th><th>T4</th>
-        <th>T5</th><th>T6</th><th>T7</th><th>CN</th>
+        <th>T2</th><th>T3</th><th>T4</th><th>T5</th><th>T6</th><th>T7</th><th>CN</th>
       </tr>
     </thead>
     <tbody id="tableBody"></tbody>
   </table>
 
-  <h3>📜 LỊCH SỬ HOÀN THÀNH</h3>
+  <!-- HISTORY -->
+  <h2>📜 LỊCH SỬ HOÀN THÀNH</h2>
   <table>
     <thead>
       <tr>
@@ -64,7 +63,6 @@
     <tbody id="historyBody"></tbody>
   </table>
 
-  <br>
   <button onclick="logout()">Đăng xuất</button>
 </div>
 
