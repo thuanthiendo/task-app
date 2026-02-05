@@ -24,11 +24,14 @@ th, td {
   min-width: 110px;
 }
 
-.task {
-  margin-bottom: 4px;
+#loginBox {
+  max-width: 300px;
+  margin: 100px auto;
+  text-align: center;
 }
 
-.done {
-  text-decoration: line-through;
-  color: gray;
+#loginBox input {
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
 }
