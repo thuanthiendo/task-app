@@ -42,7 +42,7 @@ function applyRole() {
   }
 }
 
-/************* AUTO LOGIN (F5 KHÔNG OUT) *************/
+/************* AUTO LOGIN *************/
 const savedUser = localStorage.getItem("user");
 const savedRole = localStorage.getItem("role");
 
@@ -125,7 +125,7 @@ function renderTable(data) {
           <span style="${t.done ? "text-decoration:line-through" : ""}">
             ${t.text}
           </span>
-          <button onclick="deleteTask('${t.id}')">❌</button>
+          ${currentRole === "admin" ? `<button onclick="deleteTask('${t.id}')">❌</button>` : ""}
         `;
         td.appendChild(div);
       });
@@ -137,24 +137,25 @@ function renderTable(data) {
   });
 }
 
-function toggleDone(id, value, name, day, task) {
+/***************** DONE + HISTORY *****************/
+window.toggleDone = function (id, value, name, day, task) {
   db.collection("tasks").doc(id).update({ done: value });
 
-  if (value) {
+  if (value === true) {
     db.collection("history").add({
-      user: name,
+      name,
       day,
       task,
-      time: new Date().toLocaleString()
+      time: Date.now(),
+      user: currentUser
     });
   }
-}
+};
 
-function deleteTask(id) {
-  if (confirm("Xóa nhiệm vụ?")) {
-    db.collection("tasks").doc(id).delete();
-  }
-}
+window.deleteTask = function (id) {
+  if (!confirm("Xóa nhiệm vụ này?")) return;
+  db.collection("tasks").doc(id).delete();
+};
 
 /***************** HISTORY *****************/
 function loadHistory() {
@@ -176,9 +177,7 @@ function loadHistory() {
           <td>${h.day}</td>
           <td>${h.task}</td>
           <td>
-            <button onclick="deleteHistory('${doc.id}')" style="color:red">
-              ❌
-            </button>
+            <button onclick="deleteHistory('${doc.id}')" style="color:red">❌</button>
           </td>
         `;
 
@@ -187,25 +186,20 @@ function loadHistory() {
     });
 }
 
-
-function deleteHistory(id) {
-  if (confirm("Xóa lịch sử này?")) {
-    db.collection("history").doc(id).delete();
-  }
-}
-
-window.clearHistory = function () {
-  if (!confirm("Xóa TOÀN BỘ lịch sử?")) return;
-
-  db.collection("history").get().then(snapshot => {
-    const batch = db.batch();
-    snapshot.forEach(doc => batch.delete(doc.ref));
-    batch.commit();
-  });
-};
 window.deleteHistory = function (id) {
   if (!confirm("Xóa lịch sử hoàn thành này?")) return;
-
   db.collection("history").doc(id).delete();
 };
 
+window.clearHistory = async function () {
+  if (currentRole !== "admin") return;
+  if (!confirm("Xóa TOÀN BỘ lịch sử?")) return;
+
+  const snap = await db.collection("history").get();
+  const batch = db.batch();
+
+  snap.forEach(doc => batch.delete(doc.ref));
+  await batch.commit();
+
+  alert("Đã xóa toàn bộ lịch sử");
+};
