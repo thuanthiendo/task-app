@@ -60,7 +60,7 @@ window.logout = function () {
   location.reload();
 };
 
-/**************** AUTO LOGIN (FIX F5) ****************/
+/**************** AUTO LOGIN ****************/
 window.addEventListener("DOMContentLoaded", () => {
   const u = localStorage.getItem("user");
   const r = localStorage.getItem("role");
@@ -81,21 +81,28 @@ window.addTask = function () {
   const name = nameInput.value.trim();
   const day = dayInput.value;
   const text = taskInput.value.trim();
+  const time = timeInput.value; // HH:mm
 
-  if (!name || !day || !text) {
-    alert("Nhập đầy đủ thông tin");
+  if (!name || !day || !text || !time) {
+    alert("Nhập đầy đủ thông tin (kể cả giờ)");
     return;
   }
+
+  const [hour, minute] = time.split(":").map(Number);
 
   db.collection("tasks").add({
     name,
     day,
     text,
+    time,       // "08:30"
+    hour,       // 8
+    minute,     // 30
     done: false,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
 
   taskInput.value = "";
+  timeInput.value = "";
 };
 
 function loadTasks() {
@@ -137,36 +144,29 @@ function renderTable(data) {
 
         cb.onchange = () => {
           db.collection("tasks").doc(t.id).update({ done: cb.checked });
-
-          if (cb.checked) {
-            addHistory(name, t.text);
-          }
+          if (cb.checked) addHistory(name, t.text, t.time);
         };
 
         const span = document.createElement("span");
-span.textContent = t.text;
+        span.textContent = `[${t.time}] ${t.text}`;
 
-div.appendChild(cb);
-div.appendChild(span);
+        div.appendChild(cb);
+        div.appendChild(span);
 
-// 👉 NÚT XÓA NHIỆM VỤ
-if (currentRole === "admin" && t.done) {
-  const delBtn = document.createElement("button");
-  delBtn.textContent = "❌";
-  delBtn.style.marginLeft = "6px";
-  delBtn.style.cursor = "pointer";
+        // ❌ XÓA TASK (CHỈ ADMIN + ĐÃ HOÀN THÀNH)
+        if (currentRole === "admin" && t.done) {
+          const delBtn = document.createElement("button");
+          delBtn.textContent = "❌";
+          delBtn.style.marginLeft = "6px";
+          delBtn.onclick = () => {
+            if (confirm("Xóa nhiệm vụ này?")) {
+              db.collection("tasks").doc(t.id).delete();
+            }
+          };
+          div.appendChild(delBtn);
+        }
 
-  delBtn.onclick = () => {
-    if (confirm("Xóa nhiệm vụ này?")) {
-      db.collection("tasks").doc(t.id).delete();
-    }
-  };
-
-  div.appendChild(delBtn);
-}
-
-td.appendChild(div);
-
+        td.appendChild(div);
       });
 
       tr.appendChild(td);
@@ -177,12 +177,11 @@ td.appendChild(div);
 }
 
 /**************** HISTORY ****************/
-function addHistory(employee, task) {
-  if (!employee || !task) return;
-
+function addHistory(employee, task, time) {
   db.collection("history").add({
     employee,
     task,
+    timeTask: time,
     checkedBy: currentUser,
     time: firebase.firestore.FieldValue.serverTimestamp()
   });
@@ -199,15 +198,14 @@ function loadHistory() {
         if (!d.employee || !d.task || !d.time) return;
 
         const tr = document.createElement("tr");
-
         tr.innerHTML = `
           <td>${d.employee}</td>
-          <td>${d.task}</td>
+          <td>[${d.timeTask}] ${d.task}</td>
           <td>${d.checkedBy}</td>
           <td>${d.time.toDate().toLocaleString()}</td>
         `;
 
-        // 👉 CHỈ ADMIN MỚI CÓ CỘT XÓA
+        // ❌ CHỈ ADMIN ĐƯỢC XÓA LỊCH SỬ
         if (currentRole === "admin") {
           const td = document.createElement("td");
           td.innerHTML = `<button onclick="deleteHistory('${doc.id}')">❌</button>`;
@@ -218,7 +216,6 @@ function loadHistory() {
       });
     });
 }
-
 
 window.deleteHistory = function (id) {
   if (currentRole !== "admin") return;
