@@ -1,55 +1,89 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } 
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
 const firebaseConfig = {
   apiKey: "AIzaSyB-ldnW85PPEL3Y4SAbWEotRvmTLtzgq8o",
   authDomain: "task-75413.firebaseapp.com",
   projectId: "task-75413",
-  storageBucket: "task-75413.appspot.com",
-  messagingSenderId: "934934617374",
-  appId: "1:934934617374:web:71ed6700a713351a72fd0f"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const tasksRef = collection(db, "tasks");
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-window.addTask = async () => {
-  const name = taskName.value;
-  const member = member.value;
-  const time = document.getElementById("time").value;
+const days = ["Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7","CN"];
 
-  await addDoc(tasksRef, {
-    name, member, time,
-    days: {},
-    note: ""
+function addTask() {
+  const name = document.getElementById("nameInput").value.trim();
+  const day = document.getElementById("dayInput").value;
+  const text = document.getElementById("taskInput").value.trim();
+
+  if (!name || !text) {
+    alert("Nhập đủ tên và nhiệm vụ");
+    return;
+  }
+
+  db.collection("tasks").add({
+    name,
+    day,
+    text,
+    done: false,
+    createdAt: Date.now() // 🔥 FIX: không dùng serverTimestamp
   });
-};
 
-onSnapshot(tasksRef, snap => {
-  const body = document.querySelector("#taskTable tbody");
-  body.innerHTML = "";
+  document.getElementById("taskInput").value = "";
+}
 
-  snap.forEach(d => {
-    const t = d.data();
-    const tr = document.createElement("tr");
+// 🔥 KHÔNG orderBy
+db.collection("tasks").onSnapshot(snapshot => {
+  const data = {};
 
-    tr.innerHTML = `
-      <td>${t.name}<br><small>${t.time || ""}</small></td>
-      ${["T2","T3","T4","T5","T6","T7","CN"]
-        .map(day => `<td><input type="checkbox"></td>`).join("")}
-      <td contenteditable></td>
-      ${location.pathname.includes("admin") 
-        ? `<td><button onclick="del('${d.id}')">X</button></td>` 
-        : ""}
-    `;
-    body.appendChild(tr);
+  snapshot.forEach(doc => {
+    const d = doc.data();
+    if (!data[d.name]) data[d.name] = {};
+    if (!data[d.name][d.day]) data[d.name][d.day] = [];
+    data[d.name][d.day].push({ id: doc.id, ...d });
   });
+
+  renderTable(data);
 });
 
-window.del = async id => {
-  if(confirm("Xóa công việc?")) {
-    await deleteDoc(doc(db, "tasks", id));
+function renderTable(data) {
+  const body = document.getElementById("tableBody");
+  body.innerHTML = "";
+
+  Object.keys(data).forEach(name => {
+    const tr = document.createElement("tr");
+
+    const nameTd = document.createElement("td");
+    nameTd.innerHTML = `<b>${name}</b>`;
+    tr.appendChild(nameTd);
+
+    days.forEach(day => {
+      const td = document.createElement("td");
+
+      (data[name][day] || []).forEach(t => {
+        const div = document.createElement("div");
+        div.innerHTML = `
+          <input type="checkbox" ${t.done ? "checked" : ""}
+            onchange="toggleDone('${t.id}', this.checked)">
+          <span style="${t.done ? "text-decoration:line-through" : ""}">
+            ${t.text}
+          </span>
+          <button onclick="deleteTask('${t.id}')">❌</button>
+        `;
+        td.appendChild(div);
+      });
+
+      tr.appendChild(td);
+    });
+
+    body.appendChild(tr);
+  });
+}
+
+function toggleDone(id, value) {
+  db.collection("tasks").doc(id).update({ done: value });
+}
+
+function deleteTask(id) {
+  if (confirm("Xoá nhiệm vụ?")) {
+    db.collection("tasks").doc(id).delete();
   }
-};
+}
