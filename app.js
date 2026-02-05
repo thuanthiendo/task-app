@@ -23,9 +23,22 @@ firebase.initializeApp({
   authDomain: "task-75413.firebaseapp.com",
   projectId: "task-75413"
 });
-const db = firebase.firestore();
 
+const db = firebase.firestore();
 const days = ["Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7","CN"];
+
+/**************** INIT APP ****************/
+function initApp(user, role) {
+  currentUser = user;
+  currentRole = role;
+
+  loginBox.style.display = "none";
+  app.style.display = "block";
+
+  applyRole();
+  loadTasks();
+  loadHistory();
+}
 
 /**************** LOGIN ****************/
 window.login = function () {
@@ -37,17 +50,10 @@ window.login = function () {
     return;
   }
 
-  currentUser = u;
-  currentRole = USERS[u].role;
-
   localStorage.setItem("user", u);
-  localStorage.setItem("role", currentRole);
+  localStorage.setItem("role", USERS[u].role);
 
-  loginBox.style.display = "none";
-  app.style.display = "block";
-
-  applyRole();
-  startApp();
+  initApp(u, USERS[u].role);
 };
 
 window.logout = function () {
@@ -55,34 +61,22 @@ window.logout = function () {
   location.reload();
 };
 
+/**************** ROLE ****************/
 function applyRole() {
   if (currentRole !== "admin") {
     document.querySelectorAll(".admin-only").forEach(e => e.remove());
   }
 }
 
-/******** AUTO LOGIN (FIX F5) ********/
+/**************** AUTO LOGIN (FIX F5) ****************/
 window.addEventListener("DOMContentLoaded", () => {
-  const u = localStorage.getItem("user");
-  const r = localStorage.getItem("role");
+  const savedUser = localStorage.getItem("user");
+  const savedRole = localStorage.getItem("role");
 
-  if (u && r) {
-    currentUser = u;
-    currentRole = r;
-
-    loginBox.style.display = "none";
-    app.style.display = "block";
-
-    applyRole();
-    startApp();
+  if (savedUser && savedRole) {
+    initApp(savedUser, savedRole);
   }
 });
-
-/**************** START ****************/
-function startApp() {
-  loadTasks();
-  loadHistory();
-}
 
 /**************** TASK ****************/
 window.addTask = function () {
@@ -92,34 +86,40 @@ window.addTask = function () {
   const day = dayInput.value;
   const text = taskInput.value.trim();
 
-  if (!name || !text) return alert("Nhập đủ thông tin");
+  if (!name || !text) {
+    alert("Nhập đầy đủ thông tin");
+    return;
+  }
 
   db.collection("tasks").add({
     name,
     day,
     text,
-    done: false
+    done: false,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
 
   taskInput.value = "";
 };
 
 function loadTasks() {
-  db.collection("tasks").onSnapshot(snap => {
-    const data = {};
+  db.collection("tasks")
+    .orderBy("createdAt")
+    .onSnapshot(snap => {
+      const data = {};
 
-    snap.forEach(doc => {
-      const d = doc.data();
-      if (!d.name) return;
+      snap.forEach(doc => {
+        const d = doc.data();
+        if (!d.name) return;
 
-      if (!data[d.name]) data[d.name] = {};
-      if (!data[d.name][d.day]) data[d.name][d.day] = [];
+        if (!data[d.name]) data[d.name] = {};
+        if (!data[d.name][d.day]) data[d.name][d.day] = [];
 
-      data[d.name][d.day].push({ id: doc.id, ...d });
+        data[d.name][d.day].push({ id: doc.id, ...d });
+      });
+
+      renderTable(data);
     });
-
-    renderTable(data);
-  });
 }
 
 function renderTable(data) {
@@ -136,16 +136,31 @@ function renderTable(data) {
         const div = document.createElement("div");
         div.style.display = "flex";
         div.style.alignItems = "center";
-        div.style.gap = "5px";
+        div.style.gap = "6px";
 
-        div.innerHTML = `
-          <input type="checkbox" ${t.done ? "checked" : ""}
-            onchange="toggleDone('${t.id}', ${!t.done}, '${name}', '${t.text}')">
-          <span style="${t.done ? "text-decoration:line-through" : ""}">
-            ${t.text}
-          </span>
-        `;
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.checked = t.done;
 
+        cb.onchange = () => {
+          db.collection("tasks").doc(t.id).update({ done: cb.checked });
+
+          if (cb.checked) {
+            db.collection("history").add({
+              name,
+              text: t.text,
+              time: new Date().toLocaleString()
+            });
+
+            db.collection("tasks").doc(t.id).delete();
+          }
+        };
+
+        const span = document.createElement("span");
+        span.textContent = t.text;
+
+        div.appendChild(cb);
+        div.appendChild(span);
         td.appendChild(div);
       });
 
@@ -156,21 +171,10 @@ function renderTable(data) {
   });
 }
 
-/**************** DONE + HISTORY ****************/
-function toggleDone(id, done, name, task) {
-  db.collection("tasks").doc(id).update({ done });
-
-  if (done) {
-    db.collection("history").add({
-      name,
-      task,
-      time: new Date().toLocaleString()
-    });
-  }
-}
-
+/**************** HISTORY ****************/
 function loadHistory() {
-  db.collection("history").orderBy("time","desc")
+  db.collection("history")
+    .orderBy("time", "desc")
     .onSnapshot(snap => {
       historyBody.innerHTML = "";
 
@@ -180,17 +184,21 @@ function loadHistory() {
 
         tr.innerHTML = `
           <td>${d.name}</td>
-          <td>${d.task}</td>
+          <td>${d.text}</td>
           <td>${d.time}</td>
-          ${currentRole === "admin"
-            ? `<td><button onclick="deleteHistory('${doc.id}')">❌</button></td>`
-            : ""}
+          ${
+            currentRole === "admin"
+              ? `<td><button onclick="deleteHistory('${doc.id}')">❌</button></td>`
+              : ""
+          }
         `;
+
         historyBody.appendChild(tr);
       });
     });
 }
 
-function deleteHistory(id) {
+window.deleteHistory = function (id) {
+  if (currentRole !== "admin") return;
   db.collection("history").doc(id).delete();
-}
+};
