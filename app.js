@@ -158,6 +158,9 @@ function deleteTask(id) {
 
 /***************** HISTORY *****************/
 function loadHistory() {
+  const historyBody = document.getElementById("historyBody");
+  historyBody.innerHTML = "";
+
   db.collection("history")
     .orderBy("time", "desc")
     .onSnapshot(snapshot => {
@@ -166,21 +169,24 @@ function loadHistory() {
       snapshot.forEach(doc => {
         const h = doc.data();
         const tr = document.createElement("tr");
+
         tr.innerHTML = `
-          <td>${h.time}</td>
-          <td>${h.user}</td>
+          <td>${new Date(h.time).toLocaleString()}</td>
+          <td>${h.name}</td>
           <td>${h.day}</td>
           <td>${h.task}</td>
           <td>
-            ${currentRole === "admin"
-              ? `<button onclick="deleteHistory('${doc.id}')">❌</button>`
-              : ""}
+            <button onclick="deleteHistory('${doc.id}')" style="color:red">
+              ❌
+            </button>
           </td>
         `;
+
         historyBody.appendChild(tr);
       });
     });
 }
+
 
 function deleteHistory(id) {
   if (confirm("Xóa lịch sử này?")) {
@@ -197,3 +203,9 @@ window.clearHistory = function () {
     batch.commit();
   });
 };
+window.deleteHistory = function (id) {
+  if (!confirm("Xóa lịch sử hoàn thành này?")) return;
+
+  db.collection("history").doc(id).delete();
+};
+
