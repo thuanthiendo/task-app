@@ -4,24 +4,26 @@
   <meta charset="UTF-8">
   <title>Bảng phân công công việc</title>
   <link rel="stylesheet" href="style.css">
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
 <!-- LOGIN -->
 <div id="loginBox">
   <h2>Đăng nhập</h2>
-  <input id="username" placeholder="Tài khoản">
+  <input id="username" placeholder="Tên đăng nhập">
   <input id="password" type="password" placeholder="Mật khẩu">
   <button onclick="login()">Đăng nhập</button>
 </div>
 
 <!-- APP -->
 <div id="app" style="display:none">
-
   <h2>BẢNG PHÂN CÔNG CÔNG VIỆC (7 NGÀY)</h2>
 
-  <!-- ADMIN -->
-  <div class="admin-only">
+  <div class="add-box admin-only">
     <input id="nameInput" placeholder="Tên nhân viên">
     <select id="dayInput">
       <option>Thứ 2</option>
@@ -37,8 +39,7 @@
     <button onclick="clearHistory()" style="color:red">🗑 Xóa toàn bộ lịch sử</button>
   </div>
 
-  <!-- TASK TABLE -->
-  <table border="1" width="100%">
+  <table>
     <thead>
       <tr>
         <th>Tên</th>
@@ -50,7 +51,7 @@
   </table>
 
   <h3>📜 LỊCH SỬ HOÀN THÀNH</h3>
-  <table border="1" width="100%">
+  <table>
     <thead>
       <tr>
         <th>Thời gian</th>
@@ -66,10 +67,6 @@
   <br>
   <button onclick="logout()">Đăng xuất</button>
 </div>
-
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script src="app.js"></script>
 </body>
