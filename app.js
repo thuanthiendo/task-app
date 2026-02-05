@@ -1,7 +1,7 @@
-/***************** LOGIN NỘI BỘ *****************/
+/**************** LOGIN ****************/
 const USERS = {
-  admin: { password: "123", role: "admin" },
-  emp1: { password: "123", role: "employee" },
+  admin:   { password: "123", role: "admin" },
+  emp1:    { password: "123", role: "employee" },
   thiendt: { password: "123", role: "employee" }
 };
 
@@ -42,7 +42,7 @@ function applyRole() {
   }
 }
 
-/************* AUTO LOGIN *************/
+/************* AUTO LOGIN (F5 KHÔNG OUT) *************/
 const savedUser = localStorage.getItem("user");
 const savedRole = localStorage.getItem("role");
 
@@ -56,7 +56,7 @@ if (savedUser && savedRole) {
   loadHistory();
 }
 
-/***************** FIREBASE *****************/
+/**************** FIREBASE ****************/
 const firebaseConfig = {
   apiKey: "AIzaSyB-ldnW85PPEL3Y4SAbWEotRvmTLtzgq8o",
   authDomain: "task-75413.firebaseapp.com",
@@ -68,7 +68,7 @@ const db = firebase.firestore();
 
 const days = ["Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7","CN"];
 
-/***************** TASK *****************/
+/**************** TASK ****************/
 window.addTask = function () {
   if (currentRole !== "admin") return;
 
@@ -82,9 +82,7 @@ window.addTask = function () {
   }
 
   db.collection("tasks").add({
-    name,
-    day,
-    text,
+    name, day, text,
     done: false,
     createdAt: Date.now()
   });
@@ -137,57 +135,61 @@ function renderTable(data) {
   });
 }
 
-/***************** DONE + HISTORY *****************/
+/**************** DONE + HISTORY ****************/
 window.toggleDone = function (id, value, name, day, task) {
   db.collection("tasks").doc(id).update({ done: value });
 
-  if (value === true) {
+  if (value) {
     db.collection("history").add({
-      name,
-      day,
-      task,
-      time: Date.now(),
-      user: currentUser
+      name, day, task,
+      time: Date.now()
     });
   }
 };
 
-window.deleteTask = function (id) {
-  if (!confirm("Xóa nhiệm vụ này?")) return;
-  db.collection("tasks").doc(id).delete();
+window.deleteTask = async function (id) {
+  if (!confirm("Xóa nhiệm vụ + lịch sử liên quan?")) return;
+
+  const taskDoc = await db.collection("tasks").doc(id).get();
+  if (taskDoc.exists) {
+    const { name, day, text } = taskDoc.data();
+
+    const snap = await db.collection("history")
+      .where("name","==",name)
+      .where("day","==",day)
+      .where("task","==",text)
+      .get();
+
+    const batch = db.batch();
+    snap.forEach(d => batch.delete(d.ref));
+    batch.delete(db.collection("tasks").doc(id));
+    await batch.commit();
+  }
 };
 
-/***************** HISTORY *****************/
+/**************** HISTORY ****************/
 function loadHistory() {
-  const historyBody = document.getElementById("historyBody");
-  historyBody.innerHTML = "";
-
   db.collection("history")
-    .orderBy("time", "desc")
+    .orderBy("time","desc")
     .onSnapshot(snapshot => {
       historyBody.innerHTML = "";
-
       snapshot.forEach(doc => {
         const h = doc.data();
         const tr = document.createElement("tr");
-
         tr.innerHTML = `
           <td>${new Date(h.time).toLocaleString()}</td>
           <td>${h.name}</td>
           <td>${h.day}</td>
           <td>${h.task}</td>
-          <td>
-            <button onclick="deleteHistory('${doc.id}')" style="color:red">❌</button>
-          </td>
+          <td><button onclick="deleteHistory('${doc.id}')">❌</button></td>
         `;
-
         historyBody.appendChild(tr);
       });
     });
 }
 
 window.deleteHistory = function (id) {
-  if (!confirm("Xóa lịch sử hoàn thành này?")) return;
+  if (!confirm("Xóa lịch sử này?")) return;
   db.collection("history").doc(id).delete();
 };
 
@@ -197,9 +199,6 @@ window.clearHistory = async function () {
 
   const snap = await db.collection("history").get();
   const batch = db.batch();
-
-  snap.forEach(doc => batch.delete(doc.ref));
+  snap.forEach(d => batch.delete(d.ref));
   await batch.commit();
-
-  alert("Đã xóa toàn bộ lịch sử");
 };
