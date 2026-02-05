@@ -123,11 +123,19 @@ function renderTable(data) {
 
       (data[name][day] || []).forEach(t => {
         const div = document.createElement("div");
+        div.style.display = "flex";
+        div.style.alignItems = "center";
+        div.style.gap = "6px";
+
         div.innerHTML = `
           <input type="checkbox" ${t.done ? "checked" : ""}
             onchange="toggleDone('${t.id}', ${!t.done}, '${name}', '${day}', '${t.text}')">
-          ${t.text}
-          ${currentRole==="admin" ? `<button onclick="deleteTask('${t.id}')">❌</button>` : ""}
+          <span style="${t.done ? "text-decoration:line-through;color:#888" : ""}">
+            ${t.text}
+          </span>
+          ${currentRole === "admin"
+            ? `<button onclick="deleteTask('${t.id}')">❌</button>`
+            : ""}
         `;
         td.appendChild(div);
       });
@@ -138,6 +146,7 @@ function renderTable(data) {
     tableBody.appendChild(tr);
   });
 }
+
 
 /**************** DONE + HISTORY ****************/
 window.toggleDone = function (id, value, assignedName, day, task) {
