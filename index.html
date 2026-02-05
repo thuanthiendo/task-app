@@ -8,12 +8,15 @@
 <body>
 
 <div id="loginBox">
-  <h2>Đăng nhập</h2>
-  <input id="username" placeholder="Tên đăng nhập">
+  <h3>Đăng nhập</h3>
+  <input id="username" placeholder="Tài khoản">
   <input id="password" type="password" placeholder="Mật khẩu">
   <button onclick="login()">Đăng nhập</button>
 </div>
 
+<div id="app" style="display:none">
+  <!-- TOÀN BỘ APP + BẢNG Ở TRONG ĐÂY -->
+</div>
 <div id="app" style="display:none">
 
   <h2>BẢNG NHIỆM VỤ (7 NGÀY)</h2>
@@ -50,8 +53,10 @@
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
-<script src="app.js" defer></script>
+  
+<script src="app.js"></script>
 </body>
 </html>
+
+
 
