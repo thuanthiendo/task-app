@@ -1,54 +1,209 @@
-body {
-  font-family: Arial, sans-serif;
-  background: #f5f6fa;
-  margin: 0;
-  padding: 20px;
+/* ===== RESET ===== */
+* {
+  box-sizing: border-box;
 }
 
+/* ===== BODY ===== */
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: linear-gradient(135deg, #f5f7fa, #e9ecf3);
+  margin: 0;
+  padding: 20px;
+  color: #333;
+}
+
+/* ===== LOGIN ===== */
 .login-box {
   width: 360px;
   margin: 120px auto;
-  background: #fff;
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 8px 20px rgba(0,0,0,.1);
+  background: #ffffff;
+  padding: 32px;
+  border-radius: 14px;
+  box-shadow: 0 15px 35px rgba(0,0,0,.12);
 }
 
-.login-box input,
+.login-box h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.login-box input {
+  width: 100%;
+  padding: 12px;
+  margin-top: 14px;
+  font-size: 15px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.login-box input:focus {
+  border-color: #4a6cf7;
+  outline: none;
+}
+
 .login-box button {
   width: 100%;
-  padding: 10px;
-  margin-top: 12px;
+  margin-top: 18px;
+  padding: 12px;
   font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  background: #4a6cf7;
+  color: #fff;
+  cursor: pointer;
+  transition: 0.2s;
 }
 
+.login-box button:hover {
+  background: #3b5bdb;
+}
+
+/* ===== HEADINGS ===== */
+h1 {
+  margin-top: 0;
+  text-align: center;
+}
+
+h2 {
+  margin-top: 30px;
+}
+
+/* ===== ADD TASK ===== */
+.add-task {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  background: #ffffff;
+  padding: 14px;
+  border-radius: 10px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.08);
+}
+
+.add-task input,
+.add-task select {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.add-task input:focus,
+.add-task select:focus {
+  border-color: #4a6cf7;
+  outline: none;
+}
+
+.add-task button {
+  padding: 10px 16px;
+  border-radius: 6px;
+  border: none;
+  background: #28a745;
+  color: #fff;
+  cursor: pointer;
+}
+
+.add-task button:hover {
+  background: #218838;
+}
+
+/* ===== TABLE ===== */
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 15px;
-  background: #fff;
+  margin-top: 16px;
+  background: #ffffff;
+  border-radius: 10px;
+  overflow: hidden;
   table-layout: fixed;
 }
 
+th {
+  background: #f1f3f9;
+  font-weight: 600;
+  text-align: center;
+}
+
 th, td {
-  border: 1px solid #ddd;
+  border: 1px solid #e1e4eb;
   padding: 8px;
   vertical-align: top;
   word-wrap: break-word;
 }
 
-th {
-  background: #f0f0f0;
-}
-
-th:first-child, td:first-child {
+th:first-child,
+td:first-child {
   width: 140px;
-  font-weight: bold;
+  font-weight: 600;
+  background: #fafbff;
 }
 
+/* ===== TASK ITEM ===== */
 .task-item {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  background: #f8f9ff;
+}
+
+.task-item span {
+  font-size: 13px;
+}
+
+.task-item input[type="checkbox"] {
+  cursor: pointer;
+}
+
+.task-item button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* ===== HISTORY ===== */
+#historyBody td {
+  font-size: 14px;
+}
+
+/* ===== BUTTONS ===== */
+button {
+  font-family: inherit;
+}
+
+button.admin-only {
+  margin-bottom: 10px;
+}
+
+/* ===== LOGOUT ===== */
+#app > button {
+  margin-top: 20px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  background: #dc3545;
+  color: #fff;
+  cursor: pointer;
+}
+
+#app > button:hover {
+  background: #c82333;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+  .add-task {
+    flex-direction: column;
+  }
+
+  th:first-child,
+  td:first-child {
+    width: 110px;
+  }
+
+  table {
+    font-size: 13px;
+  }
 }
