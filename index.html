@@ -25,14 +25,14 @@
 
   <h1>📋 BẢNG PHÂN CÔNG CÔNG VIỆC</h1>
 
-  <!-- CHUYỂN TUẦN -->
+  <!-- WEEK -->
   <div class="week-bar">
     <button onclick="prevWeek()">⬅ Tuần trước</button>
     <b id="weekLabel"></b>
     <button onclick="nextWeek()">Tuần sau ➡</button>
   </div>
 
-  <!-- ADMIN ADD TASK -->
+  <!-- ADD TASK -->
   <div class="admin-only add-task">
     <input id="nameInput" placeholder="Tên nhân viên">
 
@@ -52,7 +52,7 @@
     <button onclick="addTask()">➕ Thêm</button>
   </div>
 
-  <!-- TASK TABLE -->
+  <!-- TABLE -->
   <table>
     <thead>
       <tr id="tableHeader">
@@ -62,8 +62,8 @@
     <tbody id="tableBody"></tbody>
   </table>
 
+  <!-- HISTORY -->
   <h2>📜 LỊCH SỬ HOÀN THÀNH</h2>
-
   <button class="admin-only" onclick="clearHistory()">🗑️ Xóa toàn bộ lịch sử</button>
 
   <table>
