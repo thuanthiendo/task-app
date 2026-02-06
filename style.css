@@ -1,43 +1,9 @@
-body {
-  font-family: Arial, sans-serif;
-  background: #f5f6fa;
-  padding: 20px;
-}
-
-.login-box {
-  width: 360px;
-  margin: 120px auto;
-  background: #fff;
-  padding: 30px;
-  border-radius: 10px;
-}
-
-.week-bar {
-  margin: 10px 0;
-  display: flex;
-  gap: 15px;
-  align-items: center;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: #fff;
-  margin-top: 10px;
-}
-
-th, td {
-  border: 1px solid #ddd;
-  padding: 6px;
-  vertical-align: top;
-}
-
-th {
-  background: #f0f0f0;
-}
-
-.task-item {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 4px;
-}
+body{font-family:Arial;background:#f5f6fa;padding:20px}
+.login-box{width:360px;margin:120px auto;background:#fff;padding:30px;border-radius:10px}
+.week-bar{display:flex;gap:15px;align-items:center;margin:10px 0}
+table{width:100%;border-collapse:collapse;background:#fff;margin-top:10px}
+th,td{border:1px solid #ddd;padding:6px;vertical-align:top}
+th{background:#f0f0f0}
+.task-item{display:flex;gap:6px;align-items:center;margin-bottom:4px}
+.done-task{text-decoration:line-through;color:#888;opacity:.7}
+.delete-task-btn{background:none;border:none;color:red;cursor:pointer}
