@@ -1,134 +1,54 @@
 body {
-  font-family: "Segoe UI", Arial, sans-serif;
-  background: #f4f6fb;
+  font-family: Arial, sans-serif;
+  background: #f5f6fa;
   margin: 0;
-  padding: 24px;
-  color: #2c3e50;
+  padding: 20px;
 }
 
-/* ===== LOGIN ===== */
 .login-box {
   width: 360px;
   margin: 120px auto;
   background: #fff;
-  padding: 32px;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.12);
-}
-
-.login-box h2 {
-  text-align: center;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0,0,0,.1);
 }
 
 .login-box input,
 .login-box button {
   width: 100%;
-  padding: 12px;
-  margin-top: 14px;
-  font-size: 15px;
-}
-
-.login-box button {
-  background: #4f46e5;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.login-box button:hover {
-  background: #4338ca;
-}
-
-/* ===== WEEK CONTROL ===== */
-.week-control {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 14px;
-  margin: 16px 0;
-}
-
-.week-control button {
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  background: #fff;
-  cursor: pointer;
-}
-
-.week-control b {
+  padding: 10px;
+  margin-top: 12px;
   font-size: 16px;
 }
 
-/* ===== FORM ADD TASK ===== */
-.admin-only input,
-.admin-only select,
-.admin-only button {
-  padding: 8px;
-  margin-right: 6px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
-.admin-only button {
-  background: #16a34a;
-  color: #fff;
-  border: none;
-}
-
-.admin-only button:hover {
-  background: #15803d;
-}
-
-/* ===== TABLE ===== */
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 14px;
+  margin-top: 15px;
   background: #fff;
-  border-radius: 10px;
-  overflow: hidden;
+  table-layout: fixed;
 }
 
 th, td {
-  border-bottom: 1px solid #e5e7eb;
-  padding: 10px;
+  border: 1px solid #ddd;
+  padding: 8px;
   vertical-align: top;
   word-wrap: break-word;
 }
 
 th {
-  background: #f1f5f9;
-  text-align: center;
+  background: #f0f0f0;
 }
 
-th small {
-  font-weight: normal;
-  color: #64748b;
-}
-
-td:first-child {
+th:first-child, td:first-child {
+  width: 140px;
   font-weight: bold;
-  background: #fafafa;
 }
 
 .task-item {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 0;
-}
-
-/* ===== HISTORY ===== */
-h2 {
-  margin-top: 40px;
-}
-
-button {
-  cursor: pointer;
-}
-
-button:hover {
-  opacity: 0.9;
+  margin-bottom: 4px;
 }
