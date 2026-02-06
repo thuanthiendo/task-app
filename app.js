@@ -46,6 +46,13 @@ function getTaskDate(weekStart, day) {
   return d;
 }
 
+// format dd/mm
+function formatDate(d) {
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  return `${dd}/${mm}`;
+}
+
 function updateWeekLabel() {
   const end = new Date(currentWeekStart);
   end.setDate(end.getDate() + 6);
@@ -189,7 +196,11 @@ function renderTable(data) {
         cb.checked = t.done;
 
         const span = document.createElement("span");
-        span.textContent = `[${t.time}] ${t.text}`;
+
+        const taskDate = getTaskDate(t.weekStart, t.day);
+        const dateStr = formatDate(taskDate);
+
+        span.textContent = `[${t.time} | ${dateStr}] ${t.text}`;
         if (t.done) span.classList.add("done-task");
 
         cb.onchange = () => {
@@ -197,7 +208,6 @@ function renderTable(data) {
           span.classList.toggle("done-task", cb.checked);
 
           if (cb.checked) {
-            const taskDate = getTaskDate(t.weekStart, t.day);
             addHistory(name, t.text, t.time, taskDate);
           }
         };
