@@ -1,16 +1,17 @@
 /**************** USERS ****************/
 const USERS = { 
-               admin: { password: "123", role: "admin" }, 
-               hungtv: { password: "123", role: "admin" }, 
-               khoapt: { password: "123", role: "admin" }, 
-               emp1: { password: "123", role: "employee" }, 
-               thiendt: { password: "123", role: "employee" }, 
-               khangpd: { password: "123", role: "employee" }, 
-               huyvd: { password: "123", role: "employee" }, 
-               khoalh: { password: "123", role: "employee" }, 
-               quoclda: { password: "123", role: "employee" }, 
-               hoangminh: { password: "123", role: "employee" }, 
-               kiettv: { password: "123", role: "employee" } };
+  admin:   { password: "123", role: "admin" }, 
+  hungtv:  { password: "123", role: "admin" }, 
+  khoapt:  { password: "123", role: "admin" }, 
+  emp1:    { password: "123", role: "employee" }, 
+  thiendt: { password: "123", role: "employee" }, 
+  khangpd: { password: "123", role: "employee" }, 
+  huyvd:   { password: "123", role: "employee" }, 
+  khoalh:  { password: "123", role: "employee" }, 
+  quoclda: { password: "123", role: "employee" }, 
+  hoangminh:{ password: "123", role: "employee" }, 
+  kiettv:  { password: "123", role: "employee" }
+};
 
 let currentUser = null;
 let currentRole = null;
@@ -42,8 +43,6 @@ function formatDate(d) {
 
 /**************** CURRENT WEEK ****************/
 let currentWeek = getMonday();
-
-// restore last week
 const savedWeek = localStorage.getItem("currentWeek");
 if (savedWeek) currentWeek = new Date(savedWeek);
 
@@ -125,7 +124,7 @@ function applyRole() {
 }
 
 /**************** TASK ****************/
-window.addTask = function () {
+window.addTask = async function () {
   if (currentRole !== "admin") return;
 
   const name = nameInput.value.trim();
@@ -138,22 +137,29 @@ window.addTask = function () {
     return;
   }
 
-  const [hour, minute] = time.split(":").map(Number);
+  try {
+    const [hour, minute] = time.split(":").map(Number);
 
-  db.collection("tasks").add({
-    name,
-    day,
-    text,
-    time,
-    hour,
-    minute,
-    week: firebase.firestore.Timestamp.fromDate(new Date(currentWeek)),
-    done: false,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
+    await db.collection("tasks").add({
+      name,
+      day,
+      text,
+      time,
+      hour,
+      minute,
+      week: firebase.firestore.Timestamp.fromDate(new Date(currentWeek)),
+      done: false,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
 
-  taskInput.value = "";
-  timeInput.value = "";
+    nameInput.value = "";
+    taskInput.value = "";
+    timeInput.value = "";
+
+  } catch (err) {
+    console.error("❌ Lỗi thêm task:", err);
+    alert("Không thêm được nhiệm vụ, xem console!");
+  }
 };
 
 function loadTasks() {
@@ -163,7 +169,6 @@ function loadTasks() {
 
   db.collection("tasks")
     .where("week", "==", weekTs)
-    .orderBy("createdAt")
     .onSnapshot(snap => {
       const data = {};
 
@@ -175,6 +180,8 @@ function loadTasks() {
       });
 
       renderTable(data);
+    }, err => {
+      console.error("❌ Lỗi loadTasks:", err);
     });
 }
 
