@@ -41,6 +41,11 @@ function formatDate(d) {
   return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}`;
 }
 
+function getWeekKey(d) {
+  const monday = getMonday(d);
+  return monday.toISOString().slice(0, 10);
+}
+
 /**************** CURRENT WEEK ****************/
 let currentWeek = getMonday();
 const savedWeek = localStorage.getItem("currentWeek");
