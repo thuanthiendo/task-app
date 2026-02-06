@@ -133,7 +133,6 @@ function loadTasks() {
     .where("date", ">=", week.start)
     .where("date", "<=", week.end)
     .orderBy("date")
-    .orderBy("time")
     .onSnapshot(snap => {
       const data = {};
 
@@ -148,6 +147,7 @@ function loadTasks() {
       renderTable(data);
     });
 }
+
 
 /**************** RENDER TABLE ****************/
 function renderTable(data) {
