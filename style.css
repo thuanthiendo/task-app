@@ -1,7 +1,6 @@
 body {
   font-family: Arial, sans-serif;
   background: #f5f6fa;
-  margin: 0;
   padding: 20px;
 }
 
@@ -11,44 +10,34 @@ body {
   background: #fff;
   padding: 30px;
   border-radius: 10px;
-  box-shadow: 0 8px 20px rgba(0,0,0,.1);
 }
 
-.login-box input,
-.login-box button {
-  width: 100%;
-  padding: 10px;
-  margin-top: 12px;
-  font-size: 16px;
+.week-bar {
+  margin: 10px 0;
+  display: flex;
+  gap: 15px;
+  align-items: center;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 15px;
   background: #fff;
-  table-layout: fixed;
+  margin-top: 10px;
 }
 
 th, td {
   border: 1px solid #ddd;
-  padding: 8px;
+  padding: 6px;
   vertical-align: top;
-  word-wrap: break-word;
 }
 
 th {
   background: #f0f0f0;
 }
 
-th:first-child, td:first-child {
-  width: 140px;
-  font-weight: bold;
-}
-
 .task-item {
   display: flex;
-  align-items: center;
   gap: 6px;
   margin-bottom: 4px;
 }
