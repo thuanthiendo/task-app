@@ -12,7 +12,7 @@
 </head>
 <body>
 
-<!-- ================= LOGIN ================= -->
+<!-- LOGIN -->
 <div id="loginBox" class="login-box">
   <h2>🔐 Đăng nhập</h2>
   <input id="username" placeholder="Tài khoản">
@@ -20,12 +20,19 @@
   <button onclick="login()">Đăng nhập</button>
 </div>
 
-<!-- ================= APP ================= -->
+<!-- APP -->
 <div id="app" style="display:none">
 
   <h1>📋 BẢNG PHÂN CÔNG CÔNG VIỆC</h1>
 
-  <!-- ===== ADMIN ADD TASK ===== -->
+  <!-- CHUYỂN TUẦN -->
+  <div class="week-bar">
+    <button onclick="prevWeek()">⬅ Tuần trước</button>
+    <b id="weekLabel"></b>
+    <button onclick="nextWeek()">Tuần sau ➡</button>
+  </div>
+
+  <!-- ADMIN ADD TASK -->
   <div class="admin-only add-task">
     <input id="nameInput" placeholder="Tên nhân viên">
 
@@ -40,31 +47,21 @@
     </select>
 
     <input id="taskInput" placeholder="Nhiệm vụ">
-
-    <!-- ⏰ GIỜ PHÚT -->
     <input id="timeInput" type="time">
 
     <button onclick="addTask()">➕ Thêm</button>
   </div>
 
-  <!-- ===== TASK TABLE ===== -->
+  <!-- TASK TABLE -->
   <table>
     <thead>
-      <tr>
+      <tr id="tableHeader">
         <th>Tên</th>
-        <th>Thứ 2</th>
-        <th>Thứ 3</th>
-        <th>Thứ 4</th>
-        <th>Thứ 5</th>
-        <th>Thứ 6</th>
-        <th>Thứ 7</th>
-        <th>CN</th>
       </tr>
     </thead>
     <tbody id="tableBody"></tbody>
   </table>
 
-  <!-- ================= HISTORY ================= -->
   <h2>📜 LỊCH SỬ HOÀN THÀNH</h2>
 
   <button class="admin-only" onclick="clearHistory()">🗑️ Xóa toàn bộ lịch sử</button>
@@ -85,8 +82,6 @@
   <button onclick="logout()">Đăng xuất</button>
 </div>
 
-<!-- APP SCRIPT -->
 <script src="app.js"></script>
-
 </body>
 </html>
