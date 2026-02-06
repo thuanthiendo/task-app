@@ -8,8 +8,18 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-  <link rel="stylesheet" href="style.css">
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 6px; vertical-align: top; }
+    th { background: #eee; }
+    .task-item { margin-bottom: 4px; }
+    .login-box { max-width: 300px; margin: 100px auto; text-align: center; }
+    input, select, button { margin: 4px; padding: 6px; }
+    .week-control { text-align: center; margin: 10px 0; }
+  </style>
 </head>
+
 <body>
 
 <!-- ================= LOGIN ================= -->
@@ -17,6 +27,7 @@
   <h2>🔐 Đăng nhập</h2>
   <input id="username" placeholder="Tài khoản">
   <input id="password" type="password" placeholder="Mật khẩu">
+  <br>
   <button onclick="login()">Đăng nhập</button>
 </div>
 
@@ -25,10 +36,16 @@
 
   <h1>📋 BẢNG PHÂN CÔNG CÔNG VIỆC</h1>
 
-  <!-- ===== ADMIN ADD TASK ===== -->
-  <div class="admin-only add-task">
-    <input id="nameInput" placeholder="Tên nhân viên">
+  <!-- ===== WEEK CONTROL ===== -->
+  <div class="week-control">
+    <button onclick="changeWeek(-1)">⬅ Tuần trước</button>
+    <b id="weekLabel"></b>
+    <button onclick="changeWeek(1)">Tuần sau ➡</button>
+  </div>
 
+  <!-- ===== ADMIN ADD TASK ===== -->
+  <div class="admin-only">
+    <input id="nameInput" placeholder="Tên nhân viên">
     <select id="dayInput">
       <option>Thứ 2</option>
       <option>Thứ 3</option>
@@ -38,12 +55,8 @@
       <option>Thứ 7</option>
       <option>CN</option>
     </select>
-
     <input id="taskInput" placeholder="Nhiệm vụ">
-
-    <!-- ⏰ GIỜ PHÚT -->
     <input id="timeInput" type="time">
-
     <button onclick="addTask()">➕ Thêm</button>
   </div>
 
@@ -64,10 +77,9 @@
     <tbody id="tableBody"></tbody>
   </table>
 
-  <!-- ================= HISTORY ================= -->
+  <!-- ===== HISTORY ===== -->
   <h2>📜 LỊCH SỬ HOÀN THÀNH</h2>
-
-  <button class="admin-only" onclick="clearHistory()">🗑️ Xóa toàn bộ lịch sử</button>
+  <button class="admin-only" onclick="clearHistory()">🗑️ Xóa toàn bộ</button>
 
   <table>
     <thead>
@@ -85,8 +97,6 @@
   <button onclick="logout()">Đăng xuất</button>
 </div>
 
-<!-- APP SCRIPT -->
 <script src="app.js"></script>
-
 </body>
 </html>
