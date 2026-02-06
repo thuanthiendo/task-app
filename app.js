@@ -172,10 +172,10 @@ window.addTask = async function () {
 function loadTasks() {
   renderHeader();
 
-  const weekTs = firebase.firestore.Timestamp.fromDate(new Date(currentWeek));
+  const weekKey = getWeekKey(currentWeek);
 
   db.collection("tasks")
-    .where("week", "==", weekTs)
+    .where("weekKey", "==", weekKey)
     .onSnapshot(snap => {
       const data = {};
 
@@ -187,6 +187,9 @@ function loadTasks() {
       });
 
       renderTable(data);
+    });
+}
+
     }, err => {
       console.error("❌ Lỗi loadTasks:", err);
     });
