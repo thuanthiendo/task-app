@@ -149,6 +149,7 @@ function loadTasks() {
 }
 
 
+
 /**************** RENDER TABLE ****************/
 function renderTable(data) {
   tableBody.innerHTML = "";
