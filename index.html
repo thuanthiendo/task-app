@@ -1,232 +1,92 @@
-/**************** LOGIN ****************/
-const USERS = {
-  admin: { password: "123", role: "admin" },
-  hungtv: { password: "123", role: "admin" },
-  khoapt: { password: "123", role: "admin" },
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Bảng phân công công việc</title>
 
-  emp1: { password: "123", role: "employee" },
-  thiendt: { password: "123", role: "employee" },
-  khangpd: { password: "123", role: "employee" },
-  huyvd: { password: "123", role: "employee" },
-  khoalh: { password: "123", role: "employee" },
-  quoclda: { password: "123", role: "employee" },
-  hoangminh: { password: "123", role: "employee" },
-  kiettv: { password: "123", role: "employee" }
-};
+  <!-- FIREBASE -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-let currentUser = null;
-let currentRole = null;
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-/**************** FIREBASE ****************/
-firebase.initializeApp({
-  apiKey: "AIzaSyB-ldnW85PPEL3Y4SAbWEotRvmTLtzgq8o",
-  authDomain: "task-75413.firebaseapp.com",
-  projectId: "task-75413"
-});
+<!-- ================= LOGIN ================= -->
+<div id="loginBox" class="login-box">
+  <h2>🔐 Đăng nhập</h2>
+  <input id="username" placeholder="Tài khoản">
+  <input id="password" type="password" placeholder="Mật khẩu">
+  <button onclick="login()">Đăng nhập</button>
+</div>
 
-const db = firebase.firestore();
-const days = ["Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7","CN"];
+<!-- ================= APP ================= -->
+<div id="app" style="display:none">
 
-/**************** INIT ****************/
-function initApp(user, role) {
-  currentUser = user;
-  currentRole = role;
+  <h1>📋 BẢNG PHÂN CÔNG CÔNG VIỆC</h1>
 
-  loginBox.style.display = "none";
-  app.style.display = "block";
+  <!-- ===== ADMIN ADD TASK ===== -->
+  <div class="admin-only add-task">
+    <input id="nameInput" placeholder="Tên nhân viên">
 
-  applyRole();
-  loadTasks();
-  loadHistory();
-}
+    <select id="dayInput">
+      <option>Thứ 2</option>
+      <option>Thứ 3</option>
+      <option>Thứ 4</option>
+      <option>Thứ 5</option>
+      <option>Thứ 6</option>
+      <option>Thứ 7</option>
+      <option>CN</option>
+    </select>
 
-/**************** LOGIN ****************/
-window.login = function () {
-  const u = username.value.trim().toLowerCase();
-  const p = password.value.trim();
+    <input id="taskInput" placeholder="Nhiệm vụ">
 
-  if (!USERS[u] || USERS[u].password !== p) {
-    alert("Sai tài khoản hoặc mật khẩu");
-    return;
-  }
+    <!-- ⏰ GIỜ PHÚT -->
+    <input id="timeInput" type="time">
 
-  localStorage.setItem("user", u);
-  localStorage.setItem("role", USERS[u].role);
-  initApp(u, USERS[u].role);
-};
+    <button onclick="addTask()">➕ Thêm</button>
+  </div>
 
-window.logout = function () {
-  localStorage.clear();
-  location.reload();
-};
+  <!-- ===== TASK TABLE ===== -->
+  <table>
+    <thead>
+      <tr>
+        <th>Tên</th>
+        <th>Thứ 2</th>
+        <th>Thứ 3</th>
+        <th>Thứ 4</th>
+        <th>Thứ 5</th>
+        <th>Thứ 6</th>
+        <th>Thứ 7</th>
+        <th>CN</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
 
-/**************** AUTO LOGIN ****************/
-window.addEventListener("DOMContentLoaded", () => {
-  const u = localStorage.getItem("user");
-  const r = localStorage.getItem("role");
-  if (u && r) initApp(u, r);
-});
+  <!-- ================= HISTORY ================= -->
+  <h2>📜 LỊCH SỬ HOÀN THÀNH</h2>
 
-/**************** ROLE ****************/
-function applyRole() {
-  if (currentRole !== "admin") {
-    document.querySelectorAll(".admin-only").forEach(e => e.remove());
-  }
-}
+  <button class="admin-only" onclick="clearHistory()">🗑️ Xóa toàn bộ lịch sử</button>
 
-/**************** TASK ****************/
-window.addTask = function () {
-  if (currentRole !== "admin") return;
+  <table>
+    <thead>
+      <tr>
+        <th>Nhân viên</th>
+        <th>Nhiệm vụ</th>
+        <th>Người tick</th>
+        <th>Thời gian</th>
+        <th class="admin-only">Xóa</th>
+      </tr>
+    </thead>
+    <tbody id="historyBody"></tbody>
+  </table>
 
-  const name = nameInput.value.trim();
-  const day = dayInput.value;
-  const text = taskInput.value.trim();
-  const time = timeInput.value; // HH:mm
+  <button onclick="logout()">Đăng xuất</button>
+</div>
 
-  if (!name || !day || !text || !time) {
-    alert("Nhập đầy đủ thông tin (kể cả giờ)");
-    return;
-  }
+<!-- APP SCRIPT -->
+<script src="app.js"></script>
 
-  const [hour, minute] = time.split(":").map(Number);
-
-  db.collection("tasks").add({
-    name,
-    day,
-    text,
-    time,       // "08:30"
-    hour,       // 8
-    minute,     // 30
-    done: false,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
-
-  taskInput.value = "";
-  timeInput.value = "";
-};
-
-function loadTasks() {
-  db.collection("tasks").orderBy("createdAt")
-    .onSnapshot(snap => {
-      const data = {};
-
-      snap.forEach(doc => {
-        const d = doc.data();
-        if (!d.name || !d.day || !d.text) return;
-
-        if (!data[d.name]) data[d.name] = {};
-        if (!data[d.name][d.day]) data[d.name][d.day] = [];
-
-        data[d.name][d.day].push({ id: doc.id, ...d });
-      });
-
-      renderTable(data);
-    });
-}
-
-function renderTable(data) {
-  tableBody.innerHTML = "";
-
-  Object.keys(data).forEach(name => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td><b>${name}</b></td>`;
-
-    days.forEach(day => {
-      const td = document.createElement("td");
-
-      (data[name][day] || []).forEach(t => {
-        const div = document.createElement("div");
-        div.className = "task-item";
-
-        const cb = document.createElement("input");
-        cb.type = "checkbox";
-        cb.checked = t.done;
-
-        cb.onchange = () => {
-          db.collection("tasks").doc(t.id).update({ done: cb.checked });
-          if (cb.checked) addHistory(name, t.text, t.time);
-        };
-
-        const span = document.createElement("span");
-        span.textContent = `[${t.time}] ${t.text}`;
-
-        div.appendChild(cb);
-        div.appendChild(span);
-
-        // ❌ XÓA TASK (CHỈ ADMIN + ĐÃ HOÀN THÀNH)
-        if (currentRole === "admin" && t.done) {
-          const delBtn = document.createElement("button");
-          delBtn.textContent = "❌";
-          delBtn.style.marginLeft = "6px";
-          delBtn.onclick = () => {
-            if (confirm("Xóa nhiệm vụ này?")) {
-              db.collection("tasks").doc(t.id).delete();
-            }
-          };
-          div.appendChild(delBtn);
-        }
-
-        td.appendChild(div);
-      });
-
-      tr.appendChild(td);
-    });
-
-    tableBody.appendChild(tr);
-  });
-}
-
-/**************** HISTORY ****************/
-function addHistory(employee, task, time) {
-  db.collection("history").add({
-    employee,
-    task,
-    timeTask: time,
-    checkedBy: currentUser,
-    time: firebase.firestore.FieldValue.serverTimestamp()
-  });
-}
-
-function loadHistory() {
-  db.collection("history")
-    .orderBy("time", "desc")
-    .onSnapshot(snap => {
-      historyBody.innerHTML = "";
-
-      snap.forEach(doc => {
-        const d = doc.data();
-        if (!d.employee || !d.task || !d.time) return;
-
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${d.employee}</td>
-          <td>[${d.timeTask}] ${d.task}</td>
-          <td>${d.checkedBy}</td>
-          <td>${d.time.toDate().toLocaleString()}</td>
-        `;
-
-        // ❌ CHỈ ADMIN ĐƯỢC XÓA LỊCH SỬ
-        if (currentRole === "admin") {
-          const td = document.createElement("td");
-          td.innerHTML = `<button onclick="deleteHistory('${doc.id}')">❌</button>`;
-          tr.appendChild(td);
-        }
-
-        historyBody.appendChild(tr);
-      });
-    });
-}
-
-window.deleteHistory = function (id) {
-  if (currentRole !== "admin") return;
-  db.collection("history").doc(id).delete();
-};
-
-window.clearHistory = function () {
-  if (currentRole !== "admin") return;
-  if (!confirm("Xóa toàn bộ lịch sử?")) return;
-
-  db.collection("history").get().then(snap => {
-    snap.forEach(doc => doc.ref.delete());
-  });
-};
+</body>
+</html>
