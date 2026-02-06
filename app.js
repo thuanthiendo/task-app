@@ -74,49 +74,29 @@ function applyRole() {
   }
 }
 
-/**************** DATE - WEEK ****************/
-function getWeekRange(date = new Date()) {
-  const d = new Date(date);
-  const day = d.getDay() || 7; // CN = 7
-  const start = new Date(d);
-  start.setDate(d.getDate() - day + 1);
-  const end = new Date(start);
-  end.setDate(start.getDate() + 6);
-
-  return {
-    start: start.toISOString().slice(0, 10),
-    end: end.toISOString().slice(0, 10)
-  };
-}
-
-function getDayName(dateStr) {
-  const d = new Date(dateStr);
-  const map = ["CN","Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7"];
-  return map[d.getDay()];
-}
-
 /**************** TASK ****************/
 window.addTask = function () {
   if (currentRole !== "admin") return;
 
   const name = nameInput.value.trim();
-  const date = dateInput.value; // YYYY-MM-DD
+  const day = dayInput.value;
   const text = taskInput.value.trim();
-  const time = timeInput.value;
+  const time = timeInput.value; // HH:mm
 
-  if (!name || !date || !text || !time) {
-    alert("Nhập đầy đủ thông tin");
+  if (!name || !day || !text || !time) {
+    alert("Nhập đầy đủ thông tin (kể cả giờ)");
     return;
   }
 
-  const day = getDayName(date);
+  const [hour, minute] = time.split(":").map(Number);
 
   db.collection("tasks").add({
     name,
-    date,
     day,
     text,
-    time,
+    time,       // "08:30"
+    hour,       // 8
+    minute,     // 30
     done: false,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
@@ -125,19 +105,15 @@ window.addTask = function () {
   timeInput.value = "";
 };
 
-/**************** LOAD TASKS ****************/
 function loadTasks() {
-  const week = getWeekRange();
-
-  db.collection("tasks")
-    .where("date", ">=", week.start)
-    .where("date", "<=", week.end)
-    .orderBy("date")
+  db.collection("tasks").orderBy("createdAt")
     .onSnapshot(snap => {
       const data = {};
 
       snap.forEach(doc => {
         const d = doc.data();
+        if (!d.name || !d.day || !d.text) return;
+
         if (!data[d.name]) data[d.name] = {};
         if (!data[d.name][d.day]) data[d.name][d.day] = [];
 
@@ -148,9 +124,6 @@ function loadTasks() {
     });
 }
 
-
-
-/**************** RENDER TABLE ****************/
 function renderTable(data) {
   tableBody.innerHTML = "";
 
@@ -175,21 +148,22 @@ function renderTable(data) {
         };
 
         const span = document.createElement("span");
-        span.textContent = `[${t.time}] (${t.date}) ${t.text}`;
+        span.textContent = `[${t.time}] ${t.text}`;
 
         div.appendChild(cb);
         div.appendChild(span);
 
+        // ❌ XÓA TASK (CHỈ ADMIN + ĐÃ HOÀN THÀNH)
         if (currentRole === "admin" && t.done) {
-          const del = document.createElement("button");
-          del.textContent = "❌";
-          del.style.marginLeft = "6px";
-          del.onclick = () => {
+          const delBtn = document.createElement("button");
+          delBtn.textContent = "❌";
+          delBtn.style.marginLeft = "6px";
+          delBtn.onclick = () => {
             if (confirm("Xóa nhiệm vụ này?")) {
               db.collection("tasks").doc(t.id).delete();
             }
           };
-          div.appendChild(del);
+          div.appendChild(delBtn);
         }
 
         td.appendChild(div);
@@ -221,7 +195,7 @@ function loadHistory() {
 
       snap.forEach(doc => {
         const d = doc.data();
-        if (!d.time) return;
+        if (!d.employee || !d.task || !d.time) return;
 
         const tr = document.createElement("tr");
         tr.innerHTML = `
@@ -231,6 +205,7 @@ function loadHistory() {
           <td>${d.time.toDate().toLocaleString()}</td>
         `;
 
+        // ❌ CHỈ ADMIN ĐƯỢC XÓA LỊCH SỬ
         if (currentRole === "admin") {
           const td = document.createElement("td");
           td.innerHTML = `<button onclick="deleteHistory('${doc.id}')">❌</button>`;
