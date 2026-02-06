@@ -1,11 +1,15 @@
 /*************** USERS ***************/
-const USERS = {
-  admin: { password: "123", role: "admin" },
-  hungtv: { password: "123", role: "admin" },
-
-  emp1: { password: "123", role: "employee" },
-  khoapt: { password: "123", role: "employee" }
-};
+const USERS = { admin: { password: "123", role: "admin" },
+               hungtv: { password: "123", role: "admin" },
+               khoapt: { password: "123", role: "admin" },
+               emp1: { password: "123", role: "employee" },
+               thiendt: { password: "123", role: "employee" },
+               khangpd: { password: "123", role: "employee" },
+               huyvd: { password: "123", role: "employee" },
+               khoalh: { password: "123", role: "employee" },
+               quoclda: { password: "123", role: "employee" },
+               hoangminh: { password: "123", role: "employee" },
+               kiettv: { password: "123", role: "employee" } };
 
 let currentUser = null;
 let currentRole = null;
