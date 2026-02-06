@@ -1,17 +1,8 @@
 /**************** LOGIN ****************/
 const USERS = {
   admin: { password: "123", role: "admin" },
-  hungtv: { password: "123", role: "admin" },
-  khoapt: { password: "123", role: "admin" },
-
   emp1: { password: "123", role: "employee" },
-  thiendt: { password: "123", role: "employee" },
-  khangpd: { password: "123", role: "employee" },
-  huyvd: { password: "123", role: "employee" },
-  khoalh: { password: "123", role: "employee" },
-  quoclda: { password: "123", role: "employee" },
-  hoangminh: { password: "123", role: "employee" },
-  kiettv: { password: "123", role: "employee" }
+  emp2: { password: "123", role: "employee" }
 };
 
 let currentUser = null;
@@ -23,33 +14,54 @@ firebase.initializeApp({
   authDomain: "task-75413.firebaseapp.com",
   projectId: "task-75413"
 });
-
 const db = firebase.firestore();
+
 const days = ["Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7","CN"];
 
-/**************** INIT ****************/
-function initApp(user, role) {
-  currentUser = user;
-  currentRole = role;
+/**************** WEEK ****************/
+function getMonday(d = new Date()) {
+  d = new Date(d);
+  const day = d.getDay() || 7;
+  if (day !== 1) d.setHours(-24 * (day - 1));
+  d.setHours(0,0,0,0);
+  return d;
+}
 
+let currentWeek = getMonday();
+
+function updateWeekLabel() {
+  const end = new Date(currentWeek);
+  end.setDate(end.getDate() + 6);
+  weekLabel.textContent =
+    currentWeek.toLocaleDateString() + " → " + end.toLocaleDateString();
+}
+
+window.changeWeek = function (offset) {
+  currentWeek.setDate(currentWeek.getDate() + offset * 7);
+  updateWeekLabel();
+  loadTasks();
+};
+
+/**************** INIT ****************/
+function initApp(u, r) {
+  currentUser = u;
+  currentRole = r;
   loginBox.style.display = "none";
   app.style.display = "block";
-
   applyRole();
+  updateWeekLabel();
   loadTasks();
   loadHistory();
 }
 
 /**************** LOGIN ****************/
 window.login = function () {
-  const u = username.value.trim().toLowerCase();
+  const u = username.value.trim();
   const p = password.value.trim();
-
   if (!USERS[u] || USERS[u].password !== p) {
     alert("Sai tài khoản hoặc mật khẩu");
     return;
   }
-
   localStorage.setItem("user", u);
   localStorage.setItem("role", USERS[u].role);
   initApp(u, USERS[u].role);
@@ -60,7 +72,6 @@ window.logout = function () {
   location.reload();
 };
 
-/**************** AUTO LOGIN ****************/
 window.addEventListener("DOMContentLoaded", () => {
   const u = localStorage.getItem("user");
   const r = localStorage.getItem("role");
@@ -81,10 +92,10 @@ window.addTask = function () {
   const name = nameInput.value.trim();
   const day = dayInput.value;
   const text = taskInput.value.trim();
-  const time = timeInput.value; // HH:mm
+  const time = timeInput.value;
 
   if (!name || !day || !text || !time) {
-    alert("Nhập đầy đủ thông tin (kể cả giờ)");
+    alert("Nhập đủ thông tin");
     return;
   }
 
@@ -94,9 +105,10 @@ window.addTask = function () {
     name,
     day,
     text,
-    time,       // "08:30"
-    hour,       // 8
-    minute,     // 30
+    time,
+    hour,
+    minute,
+    week: firebase.firestore.Timestamp.fromDate(new Date(currentWeek)),
     done: false,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
@@ -106,20 +118,19 @@ window.addTask = function () {
 };
 
 function loadTasks() {
-  db.collection("tasks").orderBy("createdAt")
+  const weekTs = firebase.firestore.Timestamp.fromDate(new Date(currentWeek));
+
+  db.collection("tasks")
+    .where("week", "==", weekTs)
+    .orderBy("createdAt")
     .onSnapshot(snap => {
       const data = {};
-
       snap.forEach(doc => {
         const d = doc.data();
-        if (!d.name || !d.day || !d.text) return;
-
         if (!data[d.name]) data[d.name] = {};
         if (!data[d.name][d.day]) data[d.name][d.day] = [];
-
         data[d.name][d.day].push({ id: doc.id, ...d });
       });
-
       renderTable(data);
     });
 }
@@ -133,7 +144,6 @@ function renderTable(data) {
 
     days.forEach(day => {
       const td = document.createElement("td");
-
       (data[name][day] || []).forEach(t => {
         const div = document.createElement("div");
         div.className = "task-item";
@@ -141,34 +151,26 @@ function renderTable(data) {
         const cb = document.createElement("input");
         cb.type = "checkbox";
         cb.checked = t.done;
-
         cb.onchange = () => {
           db.collection("tasks").doc(t.id).update({ done: cb.checked });
           if (cb.checked) addHistory(name, t.text, t.time);
         };
 
         const span = document.createElement("span");
-        span.textContent = `[${t.time}] ${t.text}`;
+        span.textContent = ` [${t.time}] ${t.text}`;
 
         div.appendChild(cb);
         div.appendChild(span);
 
-        // ❌ XÓA TASK (CHỈ ADMIN + ĐÃ HOÀN THÀNH)
         if (currentRole === "admin" && t.done) {
-          const delBtn = document.createElement("button");
-          delBtn.textContent = "❌";
-          delBtn.style.marginLeft = "6px";
-          delBtn.onclick = () => {
-            if (confirm("Xóa nhiệm vụ này?")) {
-              db.collection("tasks").doc(t.id).delete();
-            }
-          };
-          div.appendChild(delBtn);
+          const del = document.createElement("button");
+          del.textContent = "❌";
+          del.onclick = () => db.collection("tasks").doc(t.id).delete();
+          div.appendChild(del);
         }
 
         td.appendChild(div);
       });
-
       tr.appendChild(td);
     });
 
@@ -192,11 +194,8 @@ function loadHistory() {
     .orderBy("time", "desc")
     .onSnapshot(snap => {
       historyBody.innerHTML = "";
-
       snap.forEach(doc => {
         const d = doc.data();
-        if (!d.employee || !d.task || !d.time) return;
-
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${d.employee}</td>
@@ -204,28 +203,23 @@ function loadHistory() {
           <td>${d.checkedBy}</td>
           <td>${d.time.toDate().toLocaleString()}</td>
         `;
-
-        // ❌ CHỈ ADMIN ĐƯỢC XÓA LỊCH SỬ
         if (currentRole === "admin") {
           const td = document.createElement("td");
           td.innerHTML = `<button onclick="deleteHistory('${doc.id}')">❌</button>`;
           tr.appendChild(td);
         }
-
         historyBody.appendChild(tr);
       });
     });
 }
 
-window.deleteHistory = function (id) {
-  if (currentRole !== "admin") return;
-  db.collection("history").doc(id).delete();
+window.deleteHistory = id => {
+  if (currentRole === "admin")
+    db.collection("history").doc(id).delete();
 };
 
 window.clearHistory = function () {
-  if (currentRole !== "admin") return;
   if (!confirm("Xóa toàn bộ lịch sử?")) return;
-
   db.collection("history").get().then(snap => {
     snap.forEach(doc => doc.ref.delete());
   });
