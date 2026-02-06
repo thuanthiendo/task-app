@@ -41,15 +41,17 @@ function formatDate(d) {
   return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}`;
 }
 
-function getWeekKey(d) {
-  const monday = getMonday(d);
-  return monday.toISOString().slice(0, 10);
-}
+
 
 /**************** CURRENT WEEK ****************/
 let currentWeek = getMonday();
 const savedWeek = localStorage.getItem("currentWeek");
 if (savedWeek) currentWeek = new Date(savedWeek);
+
+function getWeekKey(d) {
+  const monday = getMonday(d);
+  return monday.toISOString().slice(0, 10);
+}
 
 /**************** UI WEEK ****************/
 function updateWeekLabel() {
@@ -152,7 +154,7 @@ window.addTask = async function () {
       time,
       hour,
       minute,
-      week: firebase.firestore.Timestamp.fromDate(new Date(currentWeek)),
+      weekKey: getWeekKey(currentWeek),
       done: false,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
