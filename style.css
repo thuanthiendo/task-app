@@ -127,3 +127,28 @@ th {
     font-size: 18px;
   }
 }
+*{box-sizing:border-box}
+
+table{
+  font-size:14px;
+}
+
+@media (max-width:768px){
+  body{padding:8px}
+
+  .login-box{
+    width:100%;
+    margin:40px auto;
+  }
+
+  table{
+    display:block;
+    overflow-x:auto;
+    white-space:nowrap;
+  }
+
+  .week-bar{
+    flex-wrap:wrap;
+    gap:8px;
+  }
+}
