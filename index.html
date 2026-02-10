@@ -15,8 +15,8 @@
 <!-- LOGIN -->
 <div id="loginBox" class="login-box">
   <h2>🔐 Đăng nhập</h2>
-  <input id="username" placeholder="Tài khoản">
-  <input id="password" type="password" placeholder="Mật khẩu">
+  <input id="username" placeholder="Tài khoản" autocomplete="off">
+  <input id="password" type="password" placeholder="Mật khẩu" autocomplete="off">
   <button onclick="login()">Đăng nhập</button>
 </div>
 
@@ -82,6 +82,7 @@
   <button onclick="logout()">Đăng xuất</button>
 </div>
 
-<script src="app.js"></script>
+<!-- APP JS -->
+<script src="app.js" defer></script>
 </body>
 </html>
