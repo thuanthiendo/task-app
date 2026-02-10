@@ -7,6 +7,10 @@ const USERS = {
   emp1:    { password: "123", role: "employee" },
   thiendt: { password: "123", role: "employee" },
   khangpd: { password: "123", role: "employee" },
+  khoalh: { password: "123", role: "employee" },
+  quoclda: { password: "123", role: "employee" },
+  hoangminh: { password: "123", role: "employee" },
+  hieutm: { password: "123", role: "employee" },
   huyvd:   { password: "123", role: "employee" }
 };
 
