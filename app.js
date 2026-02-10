@@ -49,7 +49,10 @@ function dateFromWeek(dayIndex) {
 window.login = () => {
   const u = username.value.trim().toLowerCase();
   const p = password.value.trim();
-  if (!USERS[u] || USERS[u].password !== p) return alert("Sai tài khoản");
+  if (!USERS[u] || USERS[u].password !== p) {
+    alert("Sai tài khoản hoặc mật khẩu");
+    return;
+  }
   localStorage.setItem("user", u);
   localStorage.setItem("role", USERS[u].role);
   initApp(u, USERS[u].role);
@@ -81,7 +84,6 @@ function initApp(user, role) {
   renderHeader();
   loadTasks();
   loadHistory();
-  pushNextTaskToESP(); // ⭐ QUAN TRỌNG
 }
 
 /**************** ADD TASK ****************/
@@ -93,7 +95,10 @@ window.addTask = async () => {
   const task = taskInput.value.trim();
   const time = timeInput.value;
 
-  if (!name || !task || !time) return alert("Thiếu thông tin");
+  if (!name || !task || !time) {
+    alert("Thiếu thông tin");
+    return;
+  }
 
   const [hh, mm] = time.split(":").map(Number);
   const timeMin = hh * 60 + mm;
@@ -113,7 +118,6 @@ window.addTask = async () => {
   taskInput.value = "";
   timeInput.value = "";
   loadTasks();
-  pushNextTaskToESP();
 };
 
 /**************** LOAD TASKS ****************/
@@ -169,9 +173,11 @@ function renderTable(data) {
         if (t.done) span.classList.add("done-task");
 
         cb.onchange = async () => {
-          await db.collection("tasks").doc(t.id).update({ done: cb.checked });
-          if (cb.checked) addHistory(t.name, t.task, t.time);
-          pushNextTaskToESP();
+          await db.collection("tasks").doc(t.id)
+            .update({ done: cb.checked });
+          if (cb.checked) {
+            addHistory(t.name, t.task, t.time);
+          }
         };
 
         div.append(cb, span);
@@ -180,10 +186,9 @@ function renderTable(data) {
           const del = document.createElement("button");
           del.textContent = "❌";
           del.onclick = async () => {
-            if (!confirm("Xóa?")) return;
+            if (!confirm("Xóa task này?")) return;
             await db.collection("tasks").doc(t.id).delete();
             loadTasks();
-            pushNextTaskToESP();
           };
           div.appendChild(del);
         }
@@ -228,43 +233,57 @@ async function loadHistory() {
   });
 }
 
-/**************** QUEUE → ESP ****************/
-async function pushNextTaskToESP() {
-  const now = new Date();
-  const today = now.toISOString().slice(0,10);
-  const nowMin = now.getHours()*60 + now.getMinutes();
+/**************** SAVE FULL SCHEDULE → ESP ****************/
+window.saveScheduleToESP = async () => {
+  if (currentRole !== "admin") return;
 
   const snap = await db.collection("tasks")
-    .where("date","==",today)
+    .where("weekStart","==",
+      firebase.firestore.Timestamp.fromDate(currentWeekStart))
     .where("done","==",false)
-    .where("timeMin",">=",nowMin)
-    .orderBy("timeMin")
-    .limit(1)
     .get();
 
   if (snap.empty) {
-    await db.collection("esp_devices").doc("esp32_01").set({
-      active: false
-    }, { merge: true });
+    alert("Không có task để gửi ESP");
     return;
   }
 
-  const doc = snap.docs[0];
-  const t = doc.data();
+  const schedule = [];
 
-  const [hh, mm] = t.time.split(":").map(Number);
-  const epoch = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-    hh, mm, 0
-  ).getTime() / 1000;
+  snap.forEach(doc => {
+    const t = doc.data();
+    if (!t.date || !t.time) return;
 
-  await db.collection("esp_devices").doc("esp32_01").set({
-    active: true,
-    taskId: doc.id,
-    task: t.task,
-    time: t.time,
-    epoch
-  }, { merge: true });
-}
+    const [y,m,d] = t.date.split("-").map(Number);
+    const [hh,mm] = t.time.split(":").map(Number);
+
+    const epoch = Math.floor(
+      new Date(y, m-1, d, hh, mm, 0).getTime() / 1000
+    );
+
+    if (epoch <= Date.now()/1000) return;
+
+    schedule.push({
+      epoch,
+      title: t.task
+    });
+  });
+
+  if (!schedule.length) {
+    alert("Không có task hợp lệ trong tương lai");
+    return;
+  }
+
+  schedule.sort((a,b)=>a.epoch-b.epoch);
+
+  await db.collection("esp_devices")
+    .doc("esp32_01")
+    .set({
+      push: true,
+      version: firebase.firestore.FieldValue.increment(1),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      schedule
+    }, { merge: true });
+
+  alert("✅ Đã lưu & gửi lịch cho ESP32");
+};
