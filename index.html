@@ -25,11 +25,16 @@
 
   <h1>📋 BẢNG PHÂN CÔNG CÔNG VIỆC</h1>
 
-  <!-- WEEK -->
+  <!-- WEEK BAR -->
   <div class="week-bar">
     <button onclick="prevWeek()">⬅ Tuần trước</button>
     <b id="weekLabel"></b>
     <button onclick="nextWeek()">Tuần sau ➡</button>
+  </div>
+
+  <!-- ADMIN ACTION -->
+  <div class="admin-only" style="margin:10px 0">
+    <button onclick="saveScheduleToESP()">💾 Lưu & gửi lịch cho ESP32</button>
   </div>
 
   <!-- ADD TASK -->
@@ -52,8 +57,8 @@
     <button onclick="addTask()">➕ Thêm</button>
   </div>
 
-  <!-- TABLE -->
-  <table>
+  <!-- TASK TABLE -->
+  <table border="1" cellpadding="6" cellspacing="0">
     <thead>
       <tr id="tableHeader">
         <th>Tên</th>
@@ -64,25 +69,26 @@
 
   <!-- HISTORY -->
   <h2>📜 LỊCH SỬ HOÀN THÀNH</h2>
+
   <button class="admin-only" onclick="clearHistory()">🗑️ Xóa toàn bộ lịch sử</button>
 
-  <table>
+  <table border="1" cellpadding="6" cellspacing="0">
     <thead>
       <tr>
         <th>Nhân viên</th>
         <th>Nhiệm vụ</th>
         <th>Người tick</th>
         <th>Thời gian</th>
-        <th class="admin-only">Xóa</th>
       </tr>
     </thead>
     <tbody id="historyBody"></tbody>
   </table>
 
+  <br>
   <button onclick="logout()">Đăng xuất</button>
 </div>
 
 <!-- APP JS -->
-<script src="app.js" defer></script>
+<script src="app.js"></script>
 </body>
 </html>
