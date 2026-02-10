@@ -112,7 +112,7 @@ function initApp(user, role) {
 window.addTask = async () => {
   if (currentRole !== "admin") return;
 
-  const name = nameInput.value;
+  const name = nameInput.value.trim();
   const dayIndex = dayInput.selectedIndex;
   const text = taskInput.value.trim();
   const time = timeInput.value;
@@ -125,9 +125,9 @@ window.addTask = async () => {
   await db.collection("tasks").add({
     name,
     day: days[dayIndex],
-    date: dateFromWeek(dayIndex), // 🔥 QUAN TRỌNG CHO ESP
+    date: dateFromWeek(dayIndex), // ESP dùng
     task: text,
-    time,
+    time,                          // HH:mm
     weekStart: firebase.firestore.Timestamp.fromDate(currentWeekStart),
     done: false,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -135,6 +135,7 @@ window.addTask = async () => {
 
   taskInput.value = "";
   timeInput.value = "";
+  loadTasks();
 };
 
 /**************** LOAD TASKS ****************/
@@ -155,7 +156,7 @@ async function loadTasks() {
   renderTable(data);
 }
 
-/**************** RENDER ****************/
+/**************** RENDER HEADER ****************/
 function renderHeader() {
   tableHeader.innerHTML = "<th>Tên</th>";
   days.forEach((day, i) => {
@@ -166,6 +167,7 @@ function renderHeader() {
   });
 }
 
+/**************** RENDER TABLE ****************/
 function renderTable(data) {
   tableBody.innerHTML = "";
 
@@ -235,7 +237,7 @@ function addHistory(employee, task, time) {
 async function loadHistory() {
   const snap = await db.collection("history")
     .orderBy("time","desc")
-    .limit(300)
+    .limit(200)
     .get();
 
   historyBody.innerHTML = "";
@@ -268,6 +270,7 @@ async function loadHistory() {
   });
 }
 
+/**************** CLEAR HISTORY ****************/
 window.clearHistory = async () => {
   if (currentRole !== "admin") return;
   if (!confirm("Xóa toàn bộ lịch sử?")) return;
