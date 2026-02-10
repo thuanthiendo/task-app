@@ -7,10 +7,10 @@ const USERS = {
   emp1:    { password: "123", role: "employee" },
   thiendt: { password: "123", role: "employee" },
   khangpd: { password: "123", role: "employee" },
-  khoalh: { password: "123", role: "employee" },
+  khoalh:  { password: "123", role: "employee" },
   quoclda: { password: "123", role: "employee" },
-  hoangminh: { password: "123", role: "employee" },
-  hieutm: { password: "123", role: "employee" },
+  hoangminh:{ password: "123", role: "employee" },
+  hieutm:  { password: "123", role: "employee" },
   huyvd:   { password: "123", role: "employee" }
 };
 
@@ -23,8 +23,9 @@ firebase.initializeApp({
   authDomain: "task-75413.firebaseapp.com",
   projectId: "task-75413"
 });
-
 const db = firebase.firestore();
+
+/**************** CONSTANT ****************/
 const days = ["Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7","CN"];
 
 /**************** WEEK ****************/
@@ -36,6 +37,12 @@ function getMonday(d) {
   if (day !== 1) d.setDate(d.getDate() - day + 1);
   d.setHours(0,0,0,0);
   return d;
+}
+
+function dateFromWeek(dayIndex) {
+  const d = new Date(currentWeekStart);
+  d.setDate(d.getDate() + dayIndex);
+  return d.toISOString().slice(0,10); // YYYY-MM-DD
 }
 
 function updateWeekLabel() {
@@ -83,6 +90,7 @@ window.addEventListener("DOMContentLoaded", () => {
   if (u && r) initApp(u, r);
 });
 
+/**************** INIT ****************/
 function initApp(user, role) {
   currentUser = user;
   currentRole = role;
@@ -104,20 +112,21 @@ function initApp(user, role) {
 window.addTask = async () => {
   if (currentRole !== "admin") return;
 
-  const name = nameInput.value.trim();
-  const day  = dayInput.value;
+  const name = nameInput.value;
+  const dayIndex = dayInput.selectedIndex;
   const text = taskInput.value.trim();
   const time = timeInput.value;
 
-  if (!name || !day || !text || !time) {
+  if (!name || dayIndex < 0 || !text || !time) {
     alert("Nhập đầy đủ thông tin");
     return;
   }
 
   await db.collection("tasks").add({
     name,
-    day,
-    text,
+    day: days[dayIndex],
+    date: dateFromWeek(dayIndex), // 🔥 QUAN TRỌNG CHO ESP
+    task: text,
     time,
     weekStart: firebase.firestore.Timestamp.fromDate(currentWeekStart),
     done: false,
@@ -131,7 +140,7 @@ window.addTask = async () => {
 /**************** LOAD TASKS ****************/
 async function loadTasks() {
   const snap = await db.collection("tasks")
-    .where("weekStart", "==",
+    .where("weekStart","==",
       firebase.firestore.Timestamp.fromDate(currentWeekStart))
     .get();
 
@@ -176,26 +185,24 @@ function renderTable(data) {
         cb.checked = t.done;
 
         const span = document.createElement("span");
-        span.textContent = `[${t.time}] ${t.text}`;
+        span.textContent = `[${t.time}] ${t.task}`;
         if (t.done) span.classList.add("done-task");
 
         cb.onchange = async () => {
-          await db.collection("tasks").doc(t.id).update({ done: cb.checked });
-          span.classList.toggle("done-task", cb.checked);
+          await db.collection("tasks").doc(t.id)
+            .update({ done: cb.checked });
 
           if (cb.checked) {
-            addHistory(name, t.text, t.time);
+            addHistory(t.name, t.task, t.time);
           }
           loadTasks();
         };
 
         div.append(cb, span);
 
-        /* XÓA TASK (ADMIN + DONE) */
         if (currentRole === "admin" && t.done) {
           const del = document.createElement("button");
           del.textContent = "❌";
-          del.className = "delete-task-btn";
           del.onclick = async () => {
             if (!confirm("Xóa nhiệm vụ này?")) return;
             await db.collection("tasks").doc(t.id).delete();
@@ -227,7 +234,7 @@ function addHistory(employee, task, time) {
 
 async function loadHistory() {
   const snap = await db.collection("history")
-    .orderBy("time", "desc")
+    .orderBy("time","desc")
     .limit(300)
     .get();
 
