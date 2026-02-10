@@ -42,38 +42,14 @@ function getMonday(d) {
 function dateFromWeek(dayIndex) {
   const d = new Date(currentWeekStart);
   d.setDate(d.getDate() + dayIndex);
-  return d.toISOString().slice(0,10); // YYYY-MM-DD
+  return d.toISOString().slice(0,10);
 }
-
-function updateWeekLabel() {
-  const end = new Date(currentWeekStart);
-  end.setDate(end.getDate() + 6);
-  weekLabel.textContent =
-    `Tuần ${currentWeekStart.toLocaleDateString()} - ${end.toLocaleDateString()}`;
-}
-
-window.prevWeek = () => {
-  currentWeekStart.setDate(currentWeekStart.getDate() - 7);
-  updateWeekLabel();
-  loadTasks();
-};
-
-window.nextWeek = () => {
-  currentWeekStart.setDate(currentWeekStart.getDate() + 7);
-  updateWeekLabel();
-  loadTasks();
-};
 
 /**************** LOGIN ****************/
 window.login = () => {
   const u = username.value.trim().toLowerCase();
   const p = password.value.trim();
-
-  if (!USERS[u] || USERS[u].password !== p) {
-    alert("Sai tài khoản hoặc mật khẩu");
-    return;
-  }
-
+  if (!USERS[u] || USERS[u].password !== p) return alert("Sai tài khoản");
   localStorage.setItem("user", u);
   localStorage.setItem("role", USERS[u].role);
   initApp(u, USERS[u].role);
@@ -98,14 +74,14 @@ function initApp(user, role) {
   loginBox.style.display = "none";
   app.style.display = "block";
 
-  if (currentRole !== "admin") {
+  if (role !== "admin") {
     document.querySelectorAll(".admin-only").forEach(e => e.remove());
   }
 
-  updateWeekLabel();
   renderHeader();
   loadTasks();
   loadHistory();
+  pushNextTaskToESP(); // ⭐ QUAN TRỌNG
 }
 
 /**************** ADD TASK ****************/
@@ -114,20 +90,21 @@ window.addTask = async () => {
 
   const name = nameInput.value.trim();
   const dayIndex = dayInput.selectedIndex;
-  const text = taskInput.value.trim();
-  const time = timeInput.value; // HH:mm (RẤT QUAN TRỌNG)
+  const task = taskInput.value.trim();
+  const time = timeInput.value;
 
-  if (!name || !text || !time) {
-    alert("Nhập đầy đủ thông tin");
-    return;
-  }
+  if (!name || !task || !time) return alert("Thiếu thông tin");
+
+  const [hh, mm] = time.split(":").map(Number);
+  const timeMin = hh * 60 + mm;
 
   await db.collection("tasks").add({
     name,
     day: days[dayIndex],
-    date: dateFromWeek(dayIndex), // ESP dùng
-    task: text,
-    time,                         // HH:mm
+    date: dateFromWeek(dayIndex),
+    task,
+    time,
+    timeMin,
     weekStart: firebase.firestore.Timestamp.fromDate(currentWeekStart),
     done: false,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -136,6 +113,7 @@ window.addTask = async () => {
   taskInput.value = "";
   timeInput.value = "";
   loadTasks();
+  pushNextTaskToESP();
 };
 
 /**************** LOAD TASKS ****************/
@@ -191,33 +169,24 @@ function renderTable(data) {
         if (t.done) span.classList.add("done-task");
 
         cb.onchange = async () => {
-          await db.collection("tasks").doc(t.id)
-            .update({ done: cb.checked });
-
-          if (cb.checked) {
-            addHistory(t.name, t.task, t.time);
-          }
-
-          cb.disabled = true; // tránh spam read
+          await db.collection("tasks").doc(t.id).update({ done: cb.checked });
+          if (cb.checked) addHistory(t.name, t.task, t.time);
+          pushNextTaskToESP();
         };
 
         div.append(cb, span);
 
-// nút xóa nhiệm vụ (admin)
-if (currentRole === "admin") {
-  const del = document.createElement("button");
-  del.textContent = "❌";
-  del.title = "Xóa nhiệm vụ";
-
-  del.onclick = async () => {
-    if (!confirm("Xóa nhiệm vụ này?")) return;
-    await db.collection("tasks").doc(t.id).delete();
-    loadTasks();
-  };
-
-  div.appendChild(del);
-}
-
+        if (currentRole === "admin") {
+          const del = document.createElement("button");
+          del.textContent = "❌";
+          del.onclick = async () => {
+            if (!confirm("Xóa?")) return;
+            await db.collection("tasks").doc(t.id).delete();
+            loadTasks();
+            pushNextTaskToESP();
+          };
+          div.appendChild(del);
+        }
 
         td.appendChild(div);
       });
@@ -247,44 +216,55 @@ async function loadHistory() {
     .get();
 
   historyBody.innerHTML = "";
-
   snap.forEach(doc => {
     const d = doc.data();
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-      <td>${d.employee}</td>
-      <td>[${d.timeTask}] ${d.task}</td>
-      <td>${d.checkedBy}</td>
-      <td>${d.time?.toDate().toLocaleString() || ""}</td>
-    `;
-
-    if (currentRole === "admin") {
-      const td = document.createElement("td");
-      const btn = document.createElement("button");
-      btn.textContent = "❌";
-      btn.onclick = async () => {
-        if (!confirm("Xóa lịch sử này?")) return;
-        await db.collection("history").doc(doc.id).delete();
-        loadHistory();
-      };
-      td.appendChild(btn);
-      tr.appendChild(td);
-    }
-
-    historyBody.appendChild(tr);
+    historyBody.innerHTML += `
+      <tr>
+        <td>${d.employee}</td>
+        <td>[${d.timeTask}] ${d.task}</td>
+        <td>${d.checkedBy}</td>
+        <td>${d.time?.toDate().toLocaleString() || ""}</td>
+      </tr>`;
   });
 }
 
-/**************** CLEAR HISTORY ****************/
-window.clearHistory = async () => {
-  if (currentRole !== "admin") return;
-  if (!confirm("Xóa toàn bộ lịch sử?")) return;
+/**************** QUEUE → ESP ****************/
+async function pushNextTaskToESP() {
+  const now = new Date();
+  const today = now.toISOString().slice(0,10);
+  const nowMin = now.getHours()*60 + now.getMinutes();
 
-  const snap = await db.collection("history").get();
-  const batch = db.batch();
-  snap.forEach(doc => batch.delete(doc.ref));
-  await batch.commit();
+  const snap = await db.collection("tasks")
+    .where("date","==",today)
+    .where("done","==",false)
+    .where("timeMin",">=",nowMin)
+    .orderBy("timeMin")
+    .limit(1)
+    .get();
 
-  loadHistory();
-};
+  if (snap.empty) {
+    await db.collection("esp_devices").doc("esp32_01").set({
+      active: false
+    }, { merge: true });
+    return;
+  }
+
+  const doc = snap.docs[0];
+  const t = doc.data();
+
+  const [hh, mm] = t.time.split(":").map(Number);
+  const epoch = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    hh, mm, 0
+  ).getTime() / 1000;
+
+  await db.collection("esp_devices").doc("esp32_01").set({
+    active: true,
+    taskId: doc.id,
+    task: t.task,
+    time: t.time,
+    epoch
+  }, { merge: true });
+}
