@@ -203,16 +203,21 @@ function renderTable(data) {
 
         div.append(cb, span);
 
-        if (currentRole === "admin" && t.done) {
-          const del = document.createElement("button");
-          del.textContent = "❌";
-          del.onclick = async () => {
-            if (!confirm("Xóa nhiệm vụ này?")) return;
-            await db.collection("tasks").doc(t.id).delete();
-            loadTasks();
-          };
-          div.appendChild(del);
-        }
+// nút xóa nhiệm vụ (admin)
+if (currentRole === "admin") {
+  const del = document.createElement("button");
+  del.textContent = "❌";
+  del.title = "Xóa nhiệm vụ";
+
+  del.onclick = async () => {
+    if (!confirm("Xóa nhiệm vụ này?")) return;
+    await db.collection("tasks").doc(t.id).delete();
+    loadTasks();
+  };
+
+  div.appendChild(del);
+}
+
 
         td.appendChild(div);
       });
