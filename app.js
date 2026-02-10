@@ -115,9 +115,9 @@ window.addTask = async () => {
   const name = nameInput.value.trim();
   const dayIndex = dayInput.selectedIndex;
   const text = taskInput.value.trim();
-  const time = timeInput.value;
+  const time = timeInput.value; // HH:mm (RẤT QUAN TRỌNG)
 
-  if (!name || dayIndex < 0 || !text || !time) {
+  if (!name || !text || !time) {
     alert("Nhập đầy đủ thông tin");
     return;
   }
@@ -127,7 +127,7 @@ window.addTask = async () => {
     day: days[dayIndex],
     date: dateFromWeek(dayIndex), // ESP dùng
     task: text,
-    time,                          // HH:mm
+    time,                         // HH:mm
     weekStart: firebase.firestore.Timestamp.fromDate(currentWeekStart),
     done: false,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -197,7 +197,8 @@ function renderTable(data) {
           if (cb.checked) {
             addHistory(t.name, t.task, t.time);
           }
-          loadTasks();
+
+          cb.disabled = true; // tránh spam read
         };
 
         div.append(cb, span);
