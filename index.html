@@ -1,94 +1,76 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Bảng phân công công việc</title>
+<meta charset="UTF-8">
+<title>Bảng phân công công việc</title>
 
-  <!-- FIREBASE -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-  <link rel="stylesheet" href="style.css">
+<style>
+body { font-family: Arial; margin:20px; }
+table { border-collapse: collapse; width:100%; }
+th, td { border:1px solid #ccc; padding:8px; }
+.task-item { margin:4px 0; }
+.done-task { text-decoration: line-through; color: gray; }
+button { cursor:pointer; }
+</style>
 </head>
+
 <body>
 
-<!-- LOGIN -->
-<div id="loginBox" class="login-box">
-  <h2>🔐 Đăng nhập</h2>
-  <input id="username" placeholder="Tài khoản" autocomplete="off">
-  <input id="password" type="password" placeholder="Mật khẩu" autocomplete="off">
-  <button onclick="login()">Đăng nhập</button>
+<h2>BẢNG PHÂN CÔNG CÔNG VIỆC</h2>
+
+<div id="loginBox">
+<input id="username" placeholder="User">
+<input id="password" type="password" placeholder="Password">
+<button onclick="login()">Login</button>
 </div>
 
-<!-- APP -->
 <div id="app" style="display:none">
 
-  <h1>📋 BẢNG PHÂN CÔNG CÔNG VIỆC</h1>
+<button onclick="saveScheduleToESP()">Lưu & gửi lịch cho ESP32</button>
 
-  <!-- WEEK BAR -->
-  <div class="week-bar">
-    <button onclick="prevWeek()">⬅ Tuần trước</button>
-    <b id="weekLabel"></b>
-    <button onclick="nextWeek()">Tuần sau ➡</button>
-  </div>
+<br><br>
 
-  <!-- ADMIN ACTION -->
-  <div class="admin-only" style="margin:10px 0">
-    <button onclick="saveScheduleToESP()">💾 Lưu & gửi lịch cho ESP32</button>
-  </div>
+<input id="nameInput" placeholder="Tên nhân viên">
+<select id="dayInput">
+<option>Thứ 2</option>
+<option>Thứ 3</option>
+<option>Thứ 4</option>
+<option>Thứ 5</option>
+<option>Thứ 6</option>
+<option>Thứ 7</option>
+<option>CN</option>
+</select>
+<input id="taskInput" placeholder="Nhiệm vụ">
+<input id="timeInput" type="time">
+<button onclick="addTask()">Thêm</button>
 
-  <!-- ADD TASK -->
-  <div class="admin-only add-task">
-    <input id="nameInput" placeholder="Tên nhân viên">
+<br><br>
 
-    <select id="dayInput">
-      <option>Thứ 2</option>
-      <option>Thứ 3</option>
-      <option>Thứ 4</option>
-      <option>Thứ 5</option>
-      <option>Thứ 6</option>
-      <option>Thứ 7</option>
-      <option>CN</option>
-    </select>
+<table>
+<thead>
+<tr id="tableHeader"></tr>
+</thead>
+<tbody id="tableBody"></tbody>
+</table>
 
-    <input id="taskInput" placeholder="Nhiệm vụ">
-    <input id="timeInput" type="time">
+<h3>LỊCH SỬ</h3>
+<table>
+<thead>
+<tr>
+<th>Nhân viên</th>
+<th>Nhiệm vụ</th>
+<th>Người tick</th>
+<th>Thời gian</th>
+</tr>
+</thead>
+<tbody id="historyBody"></tbody>
+</table>
 
-    <button onclick="addTask()">➕ Thêm</button>
-  </div>
-
-  <!-- TASK TABLE -->
-  <table border="1" cellpadding="6" cellspacing="0">
-    <thead>
-      <tr id="tableHeader">
-        <th>Tên</th>
-      </tr>
-    </thead>
-    <tbody id="tableBody"></tbody>
-  </table>
-
-  <!-- HISTORY -->
-  <h2>📜 LỊCH SỬ HOÀN THÀNH</h2>
-
-  <button class="admin-only" onclick="clearHistory()">🗑️ Xóa toàn bộ lịch sử</button>
-
-  <table border="1" cellpadding="6" cellspacing="0">
-    <thead>
-      <tr>
-        <th>Nhân viên</th>
-        <th>Nhiệm vụ</th>
-        <th>Người tick</th>
-        <th>Thời gian</th>
-      </tr>
-    </thead>
-    <tbody id="historyBody"></tbody>
-  </table>
-
-  <br>
-  <button onclick="logout()">Đăng xuất</button>
 </div>
 
-<!-- APP JS -->
 <script src="app.js"></script>
 </body>
 </html>
