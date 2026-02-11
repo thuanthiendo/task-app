@@ -135,6 +135,7 @@ window.addTask = async () => {
     time,
     weekStart: firebase.firestore.Timestamp.fromDate(currentWeekStart),
     done: false,
+    historyCreated: false,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
 
@@ -207,11 +208,19 @@ function renderTable(data) {
         if (t.done) span.classList.add("done-task");
 
         cb.onchange = async () => {
-          await db.collection("tasks").doc(t.id)
-            .update({ done: cb.checked });
+          try {
 
-          if (cb.checked) {
-            addHistory(name, t.text, t.time);
+            await db.collection("tasks").doc(t.id)
+              .update({ done: cb.checked });
+
+            if (cb.checked && !t.historyCreated) {
+              await addHistory(name, t.text, t.time);
+              await db.collection("tasks").doc(t.id)
+                .update({ historyCreated: true });
+            }
+
+          } catch (err) {
+            console.error("Update lỗi:", err);
           }
         };
 
@@ -237,7 +246,17 @@ function renderTable(data) {
   });
 }
 
-/**************** REALTIME HISTORY ****************/
+/**************** HISTORY ****************/
+async function addHistory(employee, task, time) {
+  await db.collection("history").add({
+    employee,
+    task,
+    timeTask: time,
+    checkedBy: currentUser,
+    time: firebase.firestore.FieldValue.serverTimestamp()
+  });
+}
+
 let unsubscribeHistory = null;
 
 function listenHistory() {
@@ -259,7 +278,7 @@ function listenHistory() {
           <td>${d.employee}</td>
           <td>[${d.timeTask}] ${d.task}</td>
           <td>${d.checkedBy}</td>
-          <td>${d.time?.toDate().toLocaleString() || ""}</td>
+          <td>${d.time ? d.time.toDate().toLocaleString() : "Đang cập nhật..."}</td>
         `;
 
         if (currentRole === "admin") {
