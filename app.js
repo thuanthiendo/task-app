@@ -1,3 +1,17 @@
+const loginBox = document.getElementById("loginBox");
+const app = document.getElementById("app");
+const weekLabel = document.getElementById("weekLabel");
+const tableHeader = document.getElementById("tableHeader");
+const tableBody = document.getElementById("tableBody");
+const historyBody = document.getElementById("historyBody");
+
+const username = document.getElementById("username");
+const password = document.getElementById("password");
+const nameInput = document.getElementById("nameInput");
+const dayInput = document.getElementById("dayInput");
+const taskInput = document.getElementById("taskInput");
+const timeInput = document.getElementById("timeInput");
+
 /**************** USERS ****************/
 const USERS = {
   admin:   { password: "123", role: "admin" },
