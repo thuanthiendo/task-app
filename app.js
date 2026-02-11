@@ -1,3 +1,4 @@
+/**************** DOM ****************/
 const loginBox = document.getElementById("loginBox");
 const app = document.getElementById("app");
 const weekLabel = document.getElementById("weekLabel");
@@ -17,7 +18,6 @@ const USERS = {
   admin:   { password: "123", role: "admin" },
   hungtv:  { password: "123", role: "admin" },
   khoapt:  { password: "123", role: "admin" },
-
   emp1:    { password: "123", role: "employee" },
   thiendt: { password: "123", role: "employee" },
   khangpd: { password: "123", role: "employee" },
@@ -57,15 +57,19 @@ function updateWeekLabel() {
 
 window.prevWeek = () => {
   currentWeekStart.setDate(currentWeekStart.getDate() - 7);
-  updateWeekLabel();
-  loadTasks();
+  refreshWeek();
 };
 
 window.nextWeek = () => {
   currentWeekStart.setDate(currentWeekStart.getDate() + 7);
-  updateWeekLabel();
-  loadTasks();
+  refreshWeek();
 };
+
+function refreshWeek() {
+  updateWeekLabel();
+  renderHeader();
+  listenTasks();
+}
 
 /**************** LOGIN ****************/
 window.login = () => {
@@ -106,8 +110,8 @@ function initApp(user, role) {
 
   updateWeekLabel();
   renderHeader();
-  loadTasks();
-  loadHistory();
+  listenTasks();
+  listenHistory();
 }
 
 /**************** ADD TASK ****************/
@@ -138,46 +142,59 @@ window.addTask = async () => {
   timeInput.value = "";
 };
 
-/**************** LOAD TASKS ****************/
-async function loadTasks() {
-  const snap = await db.collection("tasks")
+/**************** REALTIME TASKS ****************/
+let unsubscribeTasks = null;
+
+function listenTasks() {
+
+  if (unsubscribeTasks) unsubscribeTasks();
+
+  unsubscribeTasks = db.collection("tasks")
     .where("weekStart", "==",
       firebase.firestore.Timestamp.fromDate(currentWeekStart))
-    .get();
+    .onSnapshot(snapshot => {
 
-  const data = {};
-  snap.forEach(doc => {
-    const d = doc.data();
-    if (!data[d.name]) data[d.name] = {};
-    if (!data[d.name][d.day]) data[d.name][d.day] = [];
-    data[d.name][d.day].push({ id: doc.id, ...d });
-  });
+      const data = {};
 
-  renderTable(data);
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        if (!data[d.name]) data[d.name] = {};
+        if (!data[d.name][d.day]) data[d.name][d.day] = [];
+        data[d.name][d.day].push({ id: doc.id, ...d });
+      });
+
+      renderTable(data);
+    });
 }
 
 /**************** RENDER ****************/
 function renderHeader() {
   tableHeader.innerHTML = "<th>Tên</th>";
+
   days.forEach((day, i) => {
     const d = new Date(currentWeekStart);
     d.setDate(d.getDate() + i);
+
     tableHeader.innerHTML +=
       `<th>${day}<br><small>${d.toLocaleDateString()}</small></th>`;
   });
 }
 
 function renderTable(data) {
+
   tableBody.innerHTML = "";
 
   Object.keys(data).forEach(name => {
+
     const tr = document.createElement("tr");
     tr.innerHTML = `<td><b>${name}</b></td>`;
 
     days.forEach(day => {
+
       const td = document.createElement("td");
 
       (data[name][day] || []).forEach(t => {
+
         const div = document.createElement("div");
         div.className = "task-item";
 
@@ -190,26 +207,22 @@ function renderTable(data) {
         if (t.done) span.classList.add("done-task");
 
         cb.onchange = async () => {
-          await db.collection("tasks").doc(t.id).update({ done: cb.checked });
-          span.classList.toggle("done-task", cb.checked);
+          await db.collection("tasks").doc(t.id)
+            .update({ done: cb.checked });
 
           if (cb.checked) {
             addHistory(name, t.text, t.time);
           }
-          loadTasks();
         };
 
         div.append(cb, span);
 
-        /* XÓA TASK (ADMIN + DONE) */
         if (currentRole === "admin" && t.done) {
           const del = document.createElement("button");
           del.textContent = "❌";
-          del.className = "delete-task-btn";
           del.onclick = async () => {
             if (!confirm("Xóa nhiệm vụ này?")) return;
             await db.collection("tasks").doc(t.id).delete();
-            loadTasks();
           };
           div.appendChild(del);
         }
@@ -224,61 +237,56 @@ function renderTable(data) {
   });
 }
 
-/**************** HISTORY ****************/
-function addHistory(employee, task, time) {
-  db.collection("history").add({
-    employee,
-    task,
-    timeTask: time,
-    checkedBy: currentUser,
-    time: firebase.firestore.FieldValue.serverTimestamp()
-  });
-}
+/**************** REALTIME HISTORY ****************/
+let unsubscribeHistory = null;
 
-async function loadHistory() {
-  const snap = await db.collection("history")
+function listenHistory() {
+
+  if (unsubscribeHistory) unsubscribeHistory();
+
+  unsubscribeHistory = db.collection("history")
     .orderBy("time", "desc")
     .limit(300)
-    .get();
+    .onSnapshot(snapshot => {
 
-  historyBody.innerHTML = "";
+      historyBody.innerHTML = "";
 
-  snap.forEach(doc => {
-    const d = doc.data();
-    const tr = document.createElement("tr");
+      snapshot.forEach(doc => {
+        const d = doc.data();
 
-    tr.innerHTML = `
-      <td>${d.employee}</td>
-      <td>[${d.timeTask}] ${d.task}</td>
-      <td>${d.checkedBy}</td>
-      <td>${d.time?.toDate().toLocaleString() || ""}</td>
-    `;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${d.employee}</td>
+          <td>[${d.timeTask}] ${d.task}</td>
+          <td>${d.checkedBy}</td>
+          <td>${d.time?.toDate().toLocaleString() || ""}</td>
+        `;
 
-    if (currentRole === "admin") {
-      const td = document.createElement("td");
-      const btn = document.createElement("button");
-      btn.textContent = "❌";
-      btn.onclick = async () => {
-        if (!confirm("Xóa lịch sử này?")) return;
-        await db.collection("history").doc(doc.id).delete();
-        loadHistory();
-      };
-      td.appendChild(btn);
-      tr.appendChild(td);
-    }
+        if (currentRole === "admin") {
+          const td = document.createElement("td");
+          const btn = document.createElement("button");
+          btn.textContent = "❌";
+          btn.onclick = async () => {
+            if (!confirm("Xóa lịch sử này?")) return;
+            await db.collection("history").doc(doc.id).delete();
+          };
+          td.appendChild(btn);
+          tr.appendChild(td);
+        }
 
-    historyBody.appendChild(tr);
-  });
+        historyBody.appendChild(tr);
+      });
+    });
 }
 
+/**************** CLEAR HISTORY ****************/
 window.clearHistory = async () => {
   if (currentRole !== "admin") return;
   if (!confirm("Xóa toàn bộ lịch sử?")) return;
 
   const snap = await db.collection("history").get();
   const batch = db.batch();
+
   snap.forEach(doc => batch.delete(doc.ref));
   await batch.commit();
-
-  loadHistory();
 };
