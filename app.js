@@ -1,23 +1,3 @@
-/**************** USERS ****************/
-const USERS = {
-  admin:   { password: "123", role: "admin" },
-  hungtv:  { password: "123", role: "admin" },
-  khoapt:  { password: "123", role: "admin" },
-
-  emp1:    { password: "123", role: "employee" },
-  thiendt: { password: "123", role: "employee" },
-  khangpd: { password: "123", role: "employee" },
-  khoalh:  { password: "123", role: "employee" },
-  quoclda: { password: "123", role: "employee" },
-  hoangminh:{ password: "123", role: "employee" },
-  hieutm:  { password: "123", role: "employee" },
-  huyvd:   { password: "123", role: "employee" }
-};
-
-let currentUser = null;
-let currentRole = null;
-
-/**************** FIREBASE ****************/
 firebase.initializeApp({
   apiKey: "AIzaSyB-ldnW85PPEL3Y4SAbWEotRvmTLtzgq8o",
   authDomain: "task-75413.firebaseapp.com",
@@ -25,265 +5,169 @@ firebase.initializeApp({
 });
 const db = firebase.firestore();
 
-/**************** CONSTANT ****************/
-const days = ["Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7","CN"];
+const USERS = {
+  admin:{password:"123",role:"admin"},
+  emp1:{password:"123",role:"employee"}
+};
 
-/**************** WEEK ****************/
-let currentWeekStart = getMonday(new Date());
+let currentUser=null;
+let currentRole=null;
 
-function getMonday(d) {
-  d = new Date(d);
-  const day = d.getDay() || 7;
-  if (day !== 1) d.setDate(d.getDate() - day + 1);
+const days=["Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7","CN"];
+let currentWeekStart=getMonday(new Date());
+
+function getMonday(d){
+  d=new Date(d);
+  const day=d.getDay()||7;
+  if(day!==1)d.setDate(d.getDate()-day+1);
   d.setHours(0,0,0,0);
   return d;
 }
 
-function dateFromWeek(dayIndex) {
-  const d = new Date(currentWeekStart);
-  d.setDate(d.getDate() + dayIndex);
+function dateFromWeek(i){
+  const d=new Date(currentWeekStart);
+  d.setDate(d.getDate()+i);
   return d.toISOString().slice(0,10);
 }
 
-/**************** LOGIN ****************/
-window.login = () => {
-  const u = username.value.trim().toLowerCase();
-  const p = password.value.trim();
-  if (!USERS[u] || USERS[u].password !== p) {
-    alert("Sai tài khoản hoặc mật khẩu");
-    return;
-  }
-  localStorage.setItem("user", u);
-  localStorage.setItem("role", USERS[u].role);
-  initApp(u, USERS[u].role);
-};
-
-window.logout = () => {
-  localStorage.clear();
-  location.reload();
-};
-
-window.addEventListener("DOMContentLoaded", () => {
-  const u = localStorage.getItem("user");
-  const r = localStorage.getItem("role");
-  if (u && r) initApp(u, r);
-});
-
-/**************** INIT ****************/
-function initApp(user, role) {
-  currentUser = user;
-  currentRole = role;
-
-  loginBox.style.display = "none";
-  app.style.display = "block";
-
-  if (role !== "admin") {
-    document.querySelectorAll(".admin-only").forEach(e => e.remove());
-  }
-
-  renderHeader();
+window.login=()=>{
+  const u=username.value.trim();
+  const p=password.value.trim();
+  if(!USERS[u]||USERS[u].password!==p){alert("Sai login");return;}
+  currentUser=u;
+  currentRole=USERS[u].role;
+  loginBox.style.display="none";
+  app.style.display="block";
   loadTasks();
   loadHistory();
-}
-
-/**************** ADD TASK ****************/
-window.addTask = async () => {
-  if (currentRole !== "admin") return;
-
-  const name = nameInput.value.trim();
-  const dayIndex = dayInput.selectedIndex;
-  const task = taskInput.value.trim();
-  const time = timeInput.value;
-
-  if (!name || !task || !time) {
-    alert("Thiếu thông tin");
-    return;
-  }
-
-  const [hh, mm] = time.split(":").map(Number);
-  const timeMin = hh * 60 + mm;
-
-  await db.collection("tasks").add({
-    name,
-    day: days[dayIndex],
-    date: dateFromWeek(dayIndex),
-    task,
-    time,
-    timeMin,
-    weekStart: firebase.firestore.Timestamp.fromDate(currentWeekStart),
-    done: false,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
-
-  taskInput.value = "";
-  timeInput.value = "";
-  loadTasks();
 };
 
-/**************** LOAD TASKS ****************/
-async function loadTasks() {
-  const snap = await db.collection("tasks")
-    .where("weekStart","==",
-      firebase.firestore.Timestamp.fromDate(currentWeekStart))
+async function addTask(){
+  const name=nameInput.value;
+  const day=dayInput.value;
+  const task=taskInput.value;
+  const time=timeInput.value;
+  if(!name||!task||!time){alert("Thiếu dữ liệu");return;}
+
+  await db.collection("tasks").add({
+    name,day,
+    date:dateFromWeek(dayInput.selectedIndex),
+    task,time,
+    weekStart:firebase.firestore.Timestamp.fromDate(currentWeekStart),
+    done:false,
+    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  taskInput.value="";
+  timeInput.value="";
+  loadTasks();
+}
+
+async function loadTasks(){
+  const snap=await db.collection("tasks")
+    .where("weekStart","==",firebase.firestore.Timestamp.fromDate(currentWeekStart))
     .get();
 
-  const data = {};
-  snap.forEach(doc => {
-    const d = doc.data();
-    if (!data[d.name]) data[d.name] = {};
-    if (!data[d.name][d.day]) data[d.name][d.day] = [];
-    data[d.name][d.day].push({ id: doc.id, ...d });
+  const data={};
+  snap.forEach(doc=>{
+    const d=doc.data();
+    if(!data[d.name])data[d.name]={};
+    if(!data[d.name][d.day])data[d.name][d.day]=[];
+    data[d.name][d.day].push({id:doc.id,...d});
   });
 
   renderTable(data);
 }
 
-/**************** RENDER HEADER ****************/
-function renderHeader() {
-  tableHeader.innerHTML = "<th>Tên</th>";
-  days.forEach((day, i) => {
-    const d = new Date(currentWeekStart);
-    d.setDate(d.getDate() + i);
-    tableHeader.innerHTML +=
-      `<th>${day}<br><small>${d.toLocaleDateString()}</small></th>`;
+function renderTable(data){
+  tableHeader.innerHTML="<th>Tên</th>";
+  days.forEach((day,i)=>{
+    const d=new Date(currentWeekStart);
+    d.setDate(d.getDate()+i);
+    tableHeader.innerHTML+=`<th>${day}<br>${d.toLocaleDateString()}</th>`;
   });
-}
 
-/**************** RENDER TABLE ****************/
-function renderTable(data) {
-  tableBody.innerHTML = "";
+  tableBody.innerHTML="";
+  Object.keys(data).forEach(name=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td><b>${name}</b></td>`;
 
-  Object.keys(data).forEach(name => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td><b>${name}</b></td>`;
+    days.forEach(day=>{
+      const td=document.createElement("td");
+      (data[name][day]||[]).forEach(t=>{
+        const div=document.createElement("div");
+        const cb=document.createElement("input");
+        cb.type="checkbox";
+        cb.checked=t.done;
 
-    days.forEach(day => {
-      const td = document.createElement("td");
-
-      (data[name][day] || []).forEach(t => {
-        const div = document.createElement("div");
-        div.className = "task-item";
-
-        const cb = document.createElement("input");
-        cb.type = "checkbox";
-        cb.checked = t.done;
-
-        const span = document.createElement("span");
-        span.textContent = `[${t.time}] ${t.task}`;
-        if (t.done) span.classList.add("done-task");
-
-        cb.onchange = async () => {
-          await db.collection("tasks").doc(t.id)
-            .update({ done: cb.checked });
-          if (cb.checked) {
-            addHistory(t.name, t.task, t.time);
-          }
+        cb.onchange=async()=>{
+          await db.collection("tasks").doc(t.id).update({done:cb.checked});
+          if(cb.checked)addHistory(t.name,t.task,t.time);
         };
 
-        div.append(cb, span);
+        const span=document.createElement("span");
+        span.textContent=`[${t.time}] ${t.task}`;
+        if(t.done)span.classList.add("done-task");
 
-        if (currentRole === "admin") {
-          const del = document.createElement("button");
-          del.textContent = "❌";
-          del.onclick = async () => {
-            if (!confirm("Xóa task này?")) return;
-            await db.collection("tasks").doc(t.id).delete();
-            loadTasks();
-          };
-          div.appendChild(del);
-        }
-
+        div.append(cb,span);
         td.appendChild(div);
       });
-
       tr.appendChild(td);
     });
-
     tableBody.appendChild(tr);
   });
 }
 
-/**************** HISTORY ****************/
-function addHistory(employee, task, time) {
+function addHistory(employee,task,time){
   db.collection("history").add({
-    employee,
-    task,
-    timeTask: time,
-    checkedBy: currentUser,
-    time: firebase.firestore.FieldValue.serverTimestamp()
+    employee,task,timeTask:time,
+    checkedBy:currentUser,
+    time:firebase.firestore.FieldValue.serverTimestamp()
   });
 }
 
-async function loadHistory() {
-  const snap = await db.collection("history")
-    .orderBy("time","desc")
-    .limit(200)
-    .get();
-
-  historyBody.innerHTML = "";
-  snap.forEach(doc => {
-    const d = doc.data();
-    historyBody.innerHTML += `
+async function loadHistory(){
+  const snap=await db.collection("history").orderBy("time","desc").limit(100).get();
+  historyBody.innerHTML="";
+  snap.forEach(doc=>{
+    const d=doc.data();
+    historyBody.innerHTML+=`
       <tr>
         <td>${d.employee}</td>
         <td>[${d.timeTask}] ${d.task}</td>
         <td>${d.checkedBy}</td>
-        <td>${d.time?.toDate().toLocaleString() || ""}</td>
+        <td>${d.time?.toDate().toLocaleString()||""}</td>
       </tr>`;
   });
 }
 
-/**************** SAVE FULL SCHEDULE → ESP ****************/
-window.saveScheduleToESP = async () => {
-  if (currentRole !== "admin") return;
-
-  const snap = await db.collection("tasks")
-    .where("weekStart","==",
-      firebase.firestore.Timestamp.fromDate(currentWeekStart))
+/* ===== GỬI LỊCH CHO ESP ===== */
+window.saveScheduleToESP=async()=>{
+  const snap=await db.collection("tasks")
+    .where("weekStart","==",firebase.firestore.Timestamp.fromDate(currentWeekStart))
     .where("done","==",false)
     .get();
 
-  if (snap.empty) {
-    alert("Không có task để gửi ESP");
-    return;
-  }
-
-  const schedule = [];
-
-  snap.forEach(doc => {
-    const t = doc.data();
-    if (!t.date || !t.time) return;
-
-    const [y,m,d] = t.date.split("-").map(Number);
-    const [hh,mm] = t.time.split(":").map(Number);
-
-    const epoch = Math.floor(
-      new Date(y, m-1, d, hh, mm, 0).getTime() / 1000
-    );
-
-    if (epoch <= Date.now()/1000) return;
-
-    schedule.push({
-      epoch,
-      title: t.task
-    });
+  const schedule=[];
+  snap.forEach(doc=>{
+    const t=doc.data();
+    const [y,m,d]=t.date.split("-").map(Number);
+    const [hh,mm]=t.time.split(":").map(Number);
+    const epoch=Math.floor(new Date(y,m-1,d,hh,mm).getTime()/1000);
+    if(epoch>Date.now()/1000){
+      schedule.push({epoch,title:t.task});
+    }
   });
-
-  if (!schedule.length) {
-    alert("Không có task hợp lệ trong tương lai");
-    return;
-  }
 
   schedule.sort((a,b)=>a.epoch-b.epoch);
 
-  await db.collection("esp_devices")
-    .doc("esp32_01")
-    .set({
-      push: true,
-      version: firebase.firestore.FieldValue.increment(1),
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      schedule
-    }, { merge: true });
+  if(!schedule.length){alert("Không có task tương lai");return;}
 
-  alert("✅ Đã lưu & gửi lịch cho ESP32");
+  await db.collection("esp_devices").doc("esp32_01").set({
+    push:true,
+    schedule,
+    updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+  },{merge:true});
+
+  alert("Đã gửi lịch cho ESP32");
 };
